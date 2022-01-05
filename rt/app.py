@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 ########################################################################################################################
 
-import os, json, time, flask, psutil, threading, subprocess
+import os, sys, time, flask, psutil, signal, threading, subprocess
 
 from .spectro import spectro
 
@@ -277,5 +277,25 @@ def route_rt_halt():
         'status': 'success',
         'timestamp': time.time(),
     }), 200
+
+########################################################################################################################
+# SIGNALS                                                                                                              #
+########################################################################################################################
+
+def sig_handler(sig = None, frame = None):
+
+    if curr_spectro is not None:
+
+        curr_spectro.stop()
+        curr_spectro.join()
+
+    print('\nBye.')
+
+    sys.exit(0)
+
+########################################################################################################################
+
+signal.signal(signal.SIGINT, sig_handler)
+signal.signal(signal.SIGTERM, sig_handler)
 
 ########################################################################################################################
