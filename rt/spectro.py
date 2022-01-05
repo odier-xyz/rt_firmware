@@ -26,7 +26,7 @@ import numpy as np
 
 class spectro(gr.top_block):
 
-    def __init__(self, bandwidth=2e6, frequency=1420e6, gain=30, t_sample=1):
+    def __init__(self, bandwidth=2e6, frequency=1420e6, rx_gain=30, t_sample=1):
         gr.top_block.__init__(self, "Spectro")
 
         ##################################################
@@ -34,7 +34,7 @@ class spectro(gr.top_block):
         ##################################################
         self.bandwidth = bandwidth
         self.frequency = frequency
-        self.gain = gain
+        self.rx_gain = rx_gain
         self.t_sample = t_sample
 
         ##################################################
@@ -58,7 +58,7 @@ class spectro(gr.top_block):
             ),
         )
         self.blocks_uhd_usrp_source_0.set_center_freq(frequency, 0)
-        self.blocks_uhd_usrp_source_0.set_gain(gain, 0)
+        self.blocks_uhd_usrp_source_0.set_gain(rx_gain, 0)
         self.blocks_uhd_usrp_source_0.set_antenna('RX2', 0)
         self.blocks_uhd_usrp_source_0.set_samp_rate(bandwidth)
         self.blocks_uhd_usrp_source_0.set_time_unknown_pps(uhd.time_spec())
@@ -119,12 +119,12 @@ class spectro(gr.top_block):
         self.frequency = frequency
         self.blocks_uhd_usrp_source_0.set_center_freq(self.frequency, 0)
 
-    def get_gain(self):
-        return self.gain
+    def get_rx_gain(self):
+        return self.rx_gain
 
-    def set_gain(self, gain):
-        self.gain = gain
-        self.blocks_uhd_usrp_source_0.set_gain(self.gain, 0)
+    def set_rx_gain(self, rx_gain):
+        self.rx_gain = rx_gain
+        self.blocks_uhd_usrp_source_0.set_gain(self.rx_gain, 0)
 
     def get_t_sample(self):
         return self.t_sample
@@ -185,8 +185,8 @@ def argument_parser():
         "--frequency", dest="frequency", type=eng_float, default="1.42G",
         help="Set frequency [default=%(default)r]")
     parser.add_argument(
-        "--gain", dest="gain", type=eng_float, default="30.0",
-        help="Set gain [default=%(default)r]")
+        "--rx-gain", dest="rx_gain", type=eng_float, default="30.0",
+        help="Set rx_gain [default=%(default)r]")
     parser.add_argument(
         "--t-sample", dest="t_sample", type=intx, default=1,
         help="Set t_sample [default=%(default)r]")
@@ -196,7 +196,7 @@ def argument_parser():
 def main(top_block_cls=spectro, options=None):
     if options is None:
         options = argument_parser().parse_args()
-    tb = top_block_cls(bandwidth=options.bandwidth, frequency=options.frequency, gain=options.gain, t_sample=options.t_sample)
+    tb = top_block_cls(bandwidth=options.bandwidth, frequency=options.frequency, rx_gain=options.rx_gain, t_sample=options.t_sample)
 
     def sig_handler(sig=None, frame=None):
         tb.stop()
