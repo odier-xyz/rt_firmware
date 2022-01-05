@@ -147,7 +147,7 @@ def route_st_spectro_start():
 
     try:
 
-        bandwidth = int(flask.request.args.get('bandwidth', ''))
+        bandwidth = float(flask.request.args.get('bandwidth', ''))
 
         if   bandwidth < BANDWIDTH_MIN:
             bandwidth = BANDWIDTH_MIN
@@ -162,7 +162,7 @@ def route_st_spectro_start():
 
     try:
 
-        frequency = int(flask.request.args.get('frequency', ''))
+        frequency = float(flask.request.args.get('frequency', ''))
 
         if   frequency < FREQUENCY_MIN:
             frequency = FREQUENCY_MIN
@@ -177,7 +177,7 @@ def route_st_spectro_start():
 
     try:
 
-        rx_gain = int(flask.request.args.get('rx_gain', ''))
+        rx_gain = float(flask.request.args.get('rx_gain', ''))
 
         if   rx_gain < RX_GAIN_MIN:
             rx_gain = RX_GAIN_MIN
