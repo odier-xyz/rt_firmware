@@ -3,13 +3,18 @@
 
 import os, sys, time, flask, psutil, signal, threading, subprocess
 
-from .spectro import spectro
+from .spectro_uhd import spectro_uhd
+from .spectro_osmo import spectro_osmo
 
 ########################################################################################################################
 
 BANDWIDTH_MIN = 200_000.0
 BANDWIDTH_MAX = 56_000_000.0
 BANDWIDTH_DEFAULT = 4_000_000.0
+
+CHANNELS_MIN = 0
+CHANNELS_MAX = 8192
+CHANNELS_DEFAULT = 4096
 
 FREQUENCY_MIN = 70_000_000.0
 FREQUENCY_MAX = 6_000_000_000.0
@@ -31,15 +36,27 @@ class SpectroThread(threading.Thread):
 
     ####################################################################################################################
 
-    def __init__(self, bandwidth, frequency, rx_gain):
+    def __init__(self, bandwidth, channels, frequency, rx_gain):
 
         threading.Thread.__init__(self)
 
-        self.block = spectro(
-            bandwidth = bandwidth,
-            frequency = frequency,
-            rx_gain = rx_gain
-        )
+        if flask.request.args.get('source', 'uhd') == 'uhd':
+
+            self.block = spectro_uhd(
+                bandwidth = bandwidth,
+                channels = channels,
+                frequency = frequency,
+                rx_gain = rx_gain
+            )
+
+        else:
+
+            self.block = spectro_osmo(
+                bandwidth = bandwidth,
+                channels = channels,
+                frequency = frequency,
+                rx_gain = rx_gain
+            )
 
     ####################################################################################################################
 
@@ -107,6 +124,7 @@ def route_st_status():
         spectro = {
             'status': 'stopped',
             'bandwidth': None,
+            'channels': None,
             'frequency': None,
             'rx_gain': None,
         }
@@ -116,6 +134,7 @@ def route_st_status():
         spectro = {
             'status': 'stopped',
             'bandwidth': curr_spectro.block.get_bandwidth(),
+            'channels': curr_spectro.block.get_channels(),
             'frequency': curr_spectro.block.get_frequency(),
             'rx_gain': curr_spectro.block.get_rx_gain(),
         }
@@ -162,6 +181,21 @@ def route_st_spectro_start():
 
     try:
 
+        channels = int(flask.request.args.get('channels', ''))
+
+        if   channels < CHANNELS_MIN:
+            channels = CHANNELS_MIN
+        elif channels > CHANNELS_MAX:
+            channels = CHANNELS_MAX
+
+    except ValueError as e:
+
+        channels = CHANNELS_DEFAULT
+
+    ####################################################################################################################
+
+    try:
+
         frequency = float(flask.request.args.get('frequency', ''))
 
         if   frequency < FREQUENCY_MIN:
@@ -196,6 +230,7 @@ def route_st_spectro_start():
 
             curr_spectro = SpectroThread(
                 bandwidth = bandwidth,
+                channels = channels,
                 frequency = frequency,
                 rx_gain = rx_gain,
             )
