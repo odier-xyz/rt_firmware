@@ -1,5 +1,13 @@
 # -*- coding:utf-8 -*-
 ########################################################################################################################
+# Author: Jerome ODIER
+# Email: jerome@odier.xyz
+# URL: http://odier.xyz/
+#
+# Radio Telescope
+#
+# Copyright (c) 2022-XXXX Jérôme Odier
+########################################################################################################################
 
 import numpy as np
 
@@ -15,7 +23,7 @@ from gnuradio.fft import window
 class spectro(gr.hier_block2):
     ####################################################################################################################
 
-    def __init__(self, bandwidth = 2e6, channels = 4096, t_sample = 1):
+    def __init__(self, bandwidth=2e6, channels=4096, t_sample=1):
         gr.hier_block2.__init__(
             self, "Spectro",
                 gr.io_signature(1, 1, gr.sizeof_gr_complex * 1),

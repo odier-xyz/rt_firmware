@@ -1,5 +1,13 @@
 # -*- coding:utf-8 -*-
 ########################################################################################################################
+# Author: Jerome ODIER
+# Email: jerome@odier.xyz
+# URL: http://odier.xyz/
+#
+# Radio Telescope
+#
+# Copyright (c) 2022-XXXX Jérôme Odier
+########################################################################################################################
 
 import correctiq
 
@@ -16,7 +24,7 @@ class spectro_uhd(gr.top_block):
 
     ####################################################################################################################
 
-    def __init__(self, bandwidth = 2e6, channels = 4096, frequency = 1420e6, rx_gain = 30, t_sample = 1):
+    def __init__(self, bandwidth=2e6, channels=4096, frequency=1420e6, rx_gain=30, t_sample=1):
         gr.top_block.__init__(self, "Spectro UHD")
 
         ##################################################
@@ -32,18 +40,18 @@ class spectro_uhd(gr.top_block):
         # Blocks
         ##################################################
         self.spectro_0 = spectro(
-            bandwidth = frequency,
-            channels = channels,
-            t_sample = 1,
+            bandwidth=2e6,
+            channels=4096,
+            t_sample=1,
         )
         self.correctiq_correctiq_0 = correctiq.correctiq()
-        self.blocks_zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_float, channels, 'tcp://*:50005', 100, False, -1)
+        self.blocks_zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_float, channels, 'tcp://*:50001', 100, False, -1)
         self.blocks_uhd_usrp_source_0 = uhd.usrp_source(
             ",".join(("", "")),
             uhd.stream_args(
-                cpu_format = "fc32",
-                args = '',
-                channels = list(range(0,1)),
+                cpu_format="fc32",
+                args='',
+                channels=list(range(0,1)),
             ),
         )
         self.blocks_uhd_usrp_source_0.set_center_freq(frequency, 0)
@@ -81,7 +89,6 @@ class spectro_uhd(gr.top_block):
 
     def set_channels(self, channels):
         self.channels = channels
-        self.spectro_0.set_channels(self.channels)
 
     ####################################################################################################################
 
@@ -93,7 +100,6 @@ class spectro_uhd(gr.top_block):
     def set_frequency(self, frequency):
         self.frequency = frequency
         self.blocks_uhd_usrp_source_0.set_center_freq(self.frequency, 0)
-        self.spectro_0.set_bandwidth(self.frequency)
 
     ####################################################################################################################
 

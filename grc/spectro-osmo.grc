@@ -65,7 +65,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [704, 176.0]
+    coordinate: [696, 176.0]
     rotation: 0
     state: true
 - name: channels
@@ -97,7 +97,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [416, 196.0]
+    coordinate: [408, 196.0]
     rotation: 0
     state: true
 - name: frequency
@@ -471,7 +471,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [168, 132.0]
+    coordinate: [160, 132.0]
     rotation: 0
     state: true
 - name: rx_gain
@@ -496,8 +496,8 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    bandwidth: frequency
-    channels: channels
+    bandwidth: 2e6
+    channels: '4096'
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -506,7 +506,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [544, 184.0]
+    coordinate: [536, 184.0]
     rotation: 0
     state: true
 - name: t_sample

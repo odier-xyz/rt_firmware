@@ -1,5 +1,13 @@
 # -*- coding:utf-8 -*-
 ########################################################################################################################
+# Author: Jerome ODIER
+# Email: jerome@odier.xyz
+# URL: http://odier.xyz/
+#
+# Radio Telescope
+#
+# Copyright (c) 2022-XXXX Jérôme Odier
+########################################################################################################################
 
 import os, sys, time, flask, psutil, signal, threading, subprocess
 
@@ -10,7 +18,7 @@ from .spectro_osmo import spectro_osmo
 
 BANDWIDTH_MIN = 200_000.0
 BANDWIDTH_MAX = 56_000_000.0
-BANDWIDTH_DEFAULT = 4_000_000.0
+BANDWIDTH_DEFAULT = 2_000_000.0
 
 CHANNELS_MIN = 0
 CHANNELS_MAX = 8192
@@ -22,7 +30,7 @@ FREQUENCY_DEFAULT = 1_420_000_000.0
 
 RX_GAIN_MIN = 0.0
 RX_GAIN_MAX = 76.0
-RX_GAIN_DEFAULT = 38.0
+RX_GAIN_DEFAULT = 30.0
 
 ########################################################################################################################
 # SPECTRO                                                                                                              #
