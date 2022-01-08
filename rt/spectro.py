@@ -1,28 +1,19 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -*- coding:utf-8 -*-
+########################################################################################################################
 
-#
-# SPDX-License-Identifier: GPL-3.0
-#
-# GNU Radio Python Flow Graph
-# Title: Spectro
-# GNU Radio version: 3.8.4.0
+import correctiq
 
-from gnuradio import blocks
-from gnuradio import fft
-from gnuradio.fft import window
-from gnuradio import gr
-from gnuradio.filter import firdes
-import sys
-import signal
-from argparse import ArgumentParser
-from gnuradio.eng_arg import eng_float, intx
-from gnuradio import eng_notation
-from gnuradio import uhd
-import time
-from gnuradio import zeromq
 import numpy as np
 
+from gnuradio import gr
+from gnuradio import fft
+from gnuradio import uhd
+from gnuradio import blocks
+from gnuradio import zeromq
+
+from gnuradio.fft import window
+
+########################################################################################################################
 
 class spectro(gr.top_block):
 
@@ -48,6 +39,7 @@ class spectro(gr.top_block):
         ##################################################
         # Blocks
         ##################################################
+        self.correctiq_correctiq_0 = correctiq.correctiq()
         self.blocks_zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_float, channels, 'tcp://*:50001', 100, False, -1)
         self.blocks_uhd_usrp_source_0 = uhd.usrp_source(
             ",".join(("", "")),
@@ -99,10 +91,11 @@ class spectro(gr.top_block):
         self.connect((self.blocks_stream_to_vector_1, 0), (self.blocks_multiply_const_vcc_2, 0))
         self.connect((self.blocks_stream_to_vector_2, 0), (self.blocks_multiply_const_vcc_1, 0))
         self.connect((self.blocks_stream_to_vector_3, 0), (self.blocks_multiply_const_vcc_3, 0))
-        self.connect((self.blocks_uhd_usrp_source_0, 0), (self.blocks_delay_0, 0))
-        self.connect((self.blocks_uhd_usrp_source_0, 0), (self.blocks_delay_1, 0))
-        self.connect((self.blocks_uhd_usrp_source_0, 0), (self.blocks_delay_2, 0))
-        self.connect((self.blocks_uhd_usrp_source_0, 0), (self.blocks_delay_3, 0))
+        self.connect((self.blocks_uhd_usrp_source_0, 0), (self.correctiq_correctiq_0, 0))
+        self.connect((self.correctiq_correctiq_0, 0), (self.blocks_delay_0, 0))
+        self.connect((self.correctiq_correctiq_0, 0), (self.blocks_delay_1, 0))
+        self.connect((self.correctiq_correctiq_0, 0), (self.blocks_delay_2, 0))
+        self.connect((self.correctiq_correctiq_0, 0), (self.blocks_delay_3, 0))
 
 
     def get_bandwidth(self):
@@ -173,49 +166,4 @@ class spectro(gr.top_block):
         self.blocks_multiply_const_vcc_2.set_k(self.custom_window[1*self.channels: 2*self.channels])
         self.blocks_multiply_const_vcc_3.set_k(self.custom_window[:+self.channels])
 
-
-
-
-def argument_parser():
-    parser = ArgumentParser()
-    parser.add_argument(
-        "--bandwidth", dest="bandwidth", type=eng_float, default="2.0M",
-        help="Set bandwidth [default=%(default)r]")
-    parser.add_argument(
-        "--frequency", dest="frequency", type=eng_float, default="1.42G",
-        help="Set frequency [default=%(default)r]")
-    parser.add_argument(
-        "--rx-gain", dest="rx_gain", type=eng_float, default="30.0",
-        help="Set rx_gain [default=%(default)r]")
-    parser.add_argument(
-        "--t-sample", dest="t_sample", type=intx, default=1,
-        help="Set t_sample [default=%(default)r]")
-    return parser
-
-
-def main(top_block_cls=spectro, options=None):
-    if options is None:
-        options = argument_parser().parse_args()
-    tb = top_block_cls(bandwidth=options.bandwidth, frequency=options.frequency, rx_gain=options.rx_gain, t_sample=options.t_sample)
-
-    def sig_handler(sig=None, frame=None):
-        tb.stop()
-        tb.wait()
-
-        sys.exit(0)
-
-    signal.signal(signal.SIGINT, sig_handler)
-    signal.signal(signal.SIGTERM, sig_handler)
-
-    tb.start()
-
-    try:
-        input('Press Enter to quit: ')
-    except EOFError:
-        pass
-    tb.stop()
-    tb.wait()
-
-
-if __name__ == '__main__':
-    main()
+########################################################################################################################

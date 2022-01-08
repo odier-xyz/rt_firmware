@@ -112,7 +112,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [984, 132.0]
+    coordinate: [1096, 132.0]
     rotation: 0
     state: enabled
 - name: blocks_complex_to_mag_squared_0
@@ -128,7 +128,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [984, 492.0]
+    coordinate: [1096, 492.0]
     rotation: 180
     state: enabled
 - name: blocks_delay_0
@@ -147,7 +147,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [440, 84.0]
+    coordinate: [552, 84.0]
     rotation: 0
     state: true
 - name: blocks_delay_1
@@ -166,7 +166,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [440, 148.0]
+    coordinate: [552, 148.0]
     rotation: 0
     state: enabled
 - name: blocks_delay_2
@@ -185,7 +185,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [440, 212.0]
+    coordinate: [552, 212.0]
     rotation: 0
     state: enabled
 - name: blocks_delay_3
@@ -204,7 +204,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [440, 276.0]
+    coordinate: [552, 276.0]
     rotation: 0
     state: enabled
 - name: blocks_fft_vcc_0
@@ -225,7 +225,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1108.0, 280]
+    coordinate: [1220.0, 280]
     rotation: 270
     state: enabled
 - name: blocks_integrate_ff_0
@@ -243,7 +243,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [784, 456.0]
+    coordinate: [896, 456.0]
     rotation: 180
     state: enabled
 - name: blocks_multiply_const_vcc_0
@@ -261,7 +261,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [728, 80.0]
+    coordinate: [840, 80.0]
     rotation: 0
     state: enabled
 - name: blocks_multiply_const_vcc_1
@@ -279,7 +279,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [728, 144.0]
+    coordinate: [840, 144.0]
     rotation: 0
     state: enabled
 - name: blocks_multiply_const_vcc_2
@@ -297,7 +297,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [728, 208.0]
+    coordinate: [840, 208.0]
     rotation: 0
     state: enabled
 - name: blocks_multiply_const_vcc_3
@@ -315,7 +315,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [728, 272.0]
+    coordinate: [840, 272.0]
     rotation: 0
     state: enabled
 - name: blocks_stream_to_vector_0
@@ -333,7 +333,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [576, 84.0]
+    coordinate: [688, 84.0]
     rotation: 0
     state: enabled
 - name: blocks_stream_to_vector_1
@@ -351,7 +351,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [576, 212.0]
+    coordinate: [688, 212.0]
     rotation: 0
     state: enabled
 - name: blocks_stream_to_vector_2
@@ -369,7 +369,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [576, 148.0]
+    coordinate: [688, 148.0]
     rotation: 0
     state: enabled
 - name: blocks_stream_to_vector_3
@@ -387,7 +387,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [576, 276.0]
+    coordinate: [688, 276.0]
     rotation: 0
     state: enabled
 - name: blocks_uhd_usrp_source_0
@@ -778,8 +778,23 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [568, 408.0]
+    coordinate: [680, 408.0]
     rotation: 180
+    state: true
+- name: correctiq_correctiq_0
+  id: correctiq_correctiq
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [392, 180.0]
+    rotation: 0
     state: true
 - name: frequency
   id: parameter
@@ -863,10 +878,11 @@ connections:
 - [blocks_stream_to_vector_1, '0', blocks_multiply_const_vcc_2, '0']
 - [blocks_stream_to_vector_2, '0', blocks_multiply_const_vcc_1, '0']
 - [blocks_stream_to_vector_3, '0', blocks_multiply_const_vcc_3, '0']
-- [blocks_uhd_usrp_source_0, '0', blocks_delay_0, '0']
-- [blocks_uhd_usrp_source_0, '0', blocks_delay_1, '0']
-- [blocks_uhd_usrp_source_0, '0', blocks_delay_2, '0']
-- [blocks_uhd_usrp_source_0, '0', blocks_delay_3, '0']
+- [blocks_uhd_usrp_source_0, '0', correctiq_correctiq_0, '0']
+- [correctiq_correctiq_0, '0', blocks_delay_0, '0']
+- [correctiq_correctiq_0, '0', blocks_delay_1, '0']
+- [correctiq_correctiq_0, '0', blocks_delay_2, '0']
+- [correctiq_correctiq_0, '0', blocks_delay_3, '0']
 
 metadata:
   file_format: 1
