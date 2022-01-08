@@ -58,10 +58,10 @@ class spectro(gr.top_block):
         self.blocks_stream_to_vector_2 = blocks.stream_to_vector(gr.sizeof_gr_complex*1, channels)
         self.blocks_stream_to_vector_1 = blocks.stream_to_vector(gr.sizeof_gr_complex*1, channels)
         self.blocks_stream_to_vector_0 = blocks.stream_to_vector(gr.sizeof_gr_complex*1, channels)
-        self.blocks_multiply_const_vcc_3 = blocks.multiply_const_vcc(custom_window[:+channels])
-        self.blocks_multiply_const_vcc_2 = blocks.multiply_const_vcc(custom_window[1*channels: 2*channels])
-        self.blocks_multiply_const_vcc_1 = blocks.multiply_const_vcc(custom_window[2*channels: 3*channels])
-        self.blocks_multiply_const_vcc_0 = blocks.multiply_const_vcc(custom_window[-channels:])
+        self.blocks_multiply_const_vcc_3 = blocks.multiply_const_vcc(custom_window[: +channels])
+        self.blocks_multiply_const_vcc_2 = blocks.multiply_const_vcc(custom_window[1 * channels: 2 * channels])
+        self.blocks_multiply_const_vcc_1 = blocks.multiply_const_vcc(custom_window[2 * channels: 3 * channels])
+        self.blocks_multiply_const_vcc_0 = blocks.multiply_const_vcc(custom_window[-channels: ])
         self.blocks_integrate_ff_0 = blocks.integrate_ff(int(t_sample*bandwidth/channels), channels)
         self.blocks_fft_vcc_0 = fft.fft_vcc(channels, True, window.blackmanharris(channels), True, 1)
         self.blocks_delay_3 = blocks.delay(gr.sizeof_gr_complex*1, channels*3)
@@ -136,10 +136,10 @@ class spectro(gr.top_block):
         self.blocks_delay_1.set_dly(self.channels*1)
         self.blocks_delay_2.set_dly(self.channels*2)
         self.blocks_delay_3.set_dly(self.channels*3)
-        self.blocks_multiply_const_vcc_0.set_k(self.custom_window[-self.channels:])
-        self.blocks_multiply_const_vcc_1.set_k(self.custom_window[2*self.channels: 3*self.channels])
-        self.blocks_multiply_const_vcc_2.set_k(self.custom_window[1*self.channels: 2*self.channels])
-        self.blocks_multiply_const_vcc_3.set_k(self.custom_window[:+self.channels])
+        self.blocks_multiply_const_vcc_0.set_k(self.custom_window[-self.channels: ])
+        self.blocks_multiply_const_vcc_1.set_k(self.custom_window[2 * self.channels: 3 * self.channels])
+        self.blocks_multiply_const_vcc_2.set_k(self.custom_window[1 * self.channels: 2 * self.channels])
+        self.blocks_multiply_const_vcc_3.set_k(self.custom_window[: +self.channels])
 
     def get_sinc_sample_locations(self):
         return self.sinc_sample_locations
@@ -161,9 +161,9 @@ class spectro(gr.top_block):
 
     def set_custom_window(self, custom_window):
         self.custom_window = custom_window
-        self.blocks_multiply_const_vcc_0.set_k(self.custom_window[-self.channels:])
-        self.blocks_multiply_const_vcc_1.set_k(self.custom_window[2*self.channels: 3*self.channels])
-        self.blocks_multiply_const_vcc_2.set_k(self.custom_window[1*self.channels: 2*self.channels])
-        self.blocks_multiply_const_vcc_3.set_k(self.custom_window[:+self.channels])
+        self.blocks_multiply_const_vcc_0.set_k(self.custom_window[-self.channels: ])
+        self.blocks_multiply_const_vcc_1.set_k(self.custom_window[2 * self.channels: 3 * self.channels])
+        self.blocks_multiply_const_vcc_2.set_k(self.custom_window[1 * self.channels: 2 * self.channels])
+        self.blocks_multiply_const_vcc_3.set_k(self.custom_window[: +self.channels])
 
 ########################################################################################################################

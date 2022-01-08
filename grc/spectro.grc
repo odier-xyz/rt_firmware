@@ -252,7 +252,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    const: custom_window[-channels:]
+    const: 'custom_window[-channels: ]'
     maxoutbuf: '0'
     minoutbuf: '0'
     type: complex
@@ -270,7 +270,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    const: 'custom_window[2*channels: 3*channels]'
+    const: 'custom_window[2 * channels: 3 * channels]'
     maxoutbuf: '0'
     minoutbuf: '0'
     type: complex
@@ -288,7 +288,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    const: 'custom_window[1*channels: 2*channels]'
+    const: 'custom_window[1 * channels: 2 * channels]'
     maxoutbuf: '0'
     minoutbuf: '0'
     type: complex
@@ -306,7 +306,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    const: custom_window[:+channels]
+    const: 'custom_window[: +channels]'
     maxoutbuf: '0'
     minoutbuf: '0'
     type: complex
