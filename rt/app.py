@@ -16,13 +16,23 @@ from .spectro_osmo import spectro_osmo
 
 ########################################################################################################################
 
+CLK_SRC_VALUES = {
+    'internal',
+    'external',
+}
+CLK_SRC_DEFAULT = 'internal'
+
+FFT_BINS_MIN = 0
+FFT_BINS_MAX = 8192
+FFT_BINS_DEFAULT = 4096
+
+INT_TIME_MIN = 1
+INT_TIME_MAX = 100
+INT_TIME_DEFAULT = 1
+
 BANDWIDTH_MIN = 200_000.0
 BANDWIDTH_MAX = 56_000_000.0
 BANDWIDTH_DEFAULT = 2_000_000.0
-
-CHANNELS_MIN = 0
-CHANNELS_MAX = 8192
-CHANNELS_DEFAULT = 4096
 
 FREQUENCY_MIN = 70_000_000.0
 FREQUENCY_MAX = 6_000_000_000.0
@@ -44,15 +54,17 @@ class SpectroThread(threading.Thread):
 
     ####################################################################################################################
 
-    def __init__(self, bandwidth, channels, frequency, rx_gain):
+    def __init__(self, clk_src, fft_bins, int_time, bandwidth, frequency, rx_gain):
 
         threading.Thread.__init__(self)
 
-        if flask.request.args.get('source', 'uhd') == 'uhd':
+        if flask.request.args.get('interface', 'uhd') == 'uhd':
 
             self.block = spectro_uhd(
+                clk_src = clk_src,
+                fft_bins = fft_bins,
+                int_time = int_time,
                 bandwidth = bandwidth,
-                channels = channels,
                 frequency = frequency,
                 rx_gain = rx_gain
             )
@@ -60,8 +72,10 @@ class SpectroThread(threading.Thread):
         else:
 
             self.block = spectro_osmo(
+                clk_src = clk_src,
+                fft_bins = fft_bins,
+                int_time = int_time,
                 bandwidth = bandwidth,
-                channels = channels,
                 frequency = frequency,
                 rx_gain = rx_gain
             )
@@ -131,8 +145,9 @@ def route_st_status():
 
         spectro = {
             'status': 'stopped',
+            'clk_src': None,
             'bandwidth': None,
-            'channels': None,
+            'fft_bins': None,
             'frequency': None,
             'rx_gain': None,
         }
@@ -140,9 +155,11 @@ def route_st_status():
     else:
 
         spectro = {
-            'status': 'stopped',
+            'status': 'started',
+            'clk_src': curr_spectro.block.get_clk_src(),
             'bandwidth': curr_spectro.block.get_bandwidth(),
-            'channels': curr_spectro.block.get_channels(),
+            'fft_bins': curr_spectro.block.get_fft_bins(),
+            'int_time': curr_spectro.block.get_int_time(),
             'frequency': curr_spectro.block.get_frequency(),
             'rx_gain': curr_spectro.block.get_rx_gain(),
         }
@@ -160,15 +177,68 @@ def route_st_status():
             'mem_free': 0x000000000000 + mem_info.available,
             'mem_used': mem_info.total - mem_info.available,
         },
+        'noise-source': None,
         'spectro': spectro,
     })
 
 ########################################################################################################################
 
+@app.route('/rt/noise-source/enable', methods = ['GET'])
+def route_rt_noise_source_enable():
+
+    return route_st_status()
+
+########################################################################################################################
+
+@app.route('/rt/noise-source/disable', methods = ['GET'])
+def route_rt_noise_source_disable():
+
+    return route_st_status()
+
+########################################################################################################################
+
 @app.route('/rt/spectro/start', methods = ['GET'])
-def route_st_spectro_start():
+def route_rt_spectro_start():
 
     global curr_spectro
+
+    ####################################################################################################################
+
+    clk_src = str(flask.request.args.get('clk_src', ''))
+
+    if clk_src not in CLK_SRC_VALUES:
+
+        clk_src = CLK_SRC_DEFAULT
+
+    ####################################################################################################################
+
+    try:
+
+        fft_bins = int(flask.request.args.get('fft_bins', ''))
+
+        if   fft_bins < FFT_BINS_MIN:
+            fft_bins = FFT_BINS_MIN
+        elif fft_bins > FFT_BINS_MAX:
+            fft_bins = FFT_BINS_MAX
+
+    except ValueError as e:
+
+        fft_bins = FFT_BINS_DEFAULT
+
+    ####################################################################################################################
+
+    try:
+
+        int_time = int(flask.request.args.get('int_time', ''))
+
+        if   int_time < INT_TIME_MIN:
+            int_time = INT_TIME_MIN
+        elif int_time > INT_TIME_MAX:
+            int_time = INT_TIME_MAX
+
+    except ValueError as e:
+
+        int_time = INT_TIME_DEFAULT
 
     ####################################################################################################################
 
@@ -184,21 +254,6 @@ def route_st_spectro_start():
     except ValueError as e:
 
         bandwidth = BANDWIDTH_DEFAULT
-
-    ####################################################################################################################
-
-    try:
-
-        channels = int(flask.request.args.get('channels', ''))
-
-        if   channels < CHANNELS_MIN:
-            channels = CHANNELS_MIN
-        elif channels > CHANNELS_MAX:
-            channels = CHANNELS_MAX
-
-    except ValueError as e:
-
-        channels = CHANNELS_DEFAULT
 
     ####################################################################################################################
 
@@ -237,8 +292,10 @@ def route_st_spectro_start():
         try:
 
             curr_spectro = SpectroThread(
+                clk_src = clk_src,
+                fft_bins = fft_bins,
+                int_time = int_time,
                 bandwidth = bandwidth,
-                channels = channels,
                 frequency = frequency,
                 rx_gain = rx_gain,
             )
@@ -257,10 +314,7 @@ def route_st_spectro_start():
 
     ####################################################################################################################
 
-    return flask.jsonify({
-        'status': 'success',
-        'timestamp': time.time(),
-    }), 200
+    return route_st_status()
 
 ########################################################################################################################
 
@@ -292,10 +346,7 @@ def route_rt_spectro_stop():
 
     ####################################################################################################################
 
-    return flask.jsonify({
-        'status': 'success',
-        'timestamp': time.time(),
-    }), 200
+    return route_st_status()
 
 ########################################################################################################################
 

@@ -23,46 +23,46 @@ from gnuradio.fft import window
 class spectro(gr.hier_block2):
     ####################################################################################################################
 
-    def __init__(self, bandwidth=2e6, channels=4096, t_sample=1):
+    def __init__(self, bandwidth=2e6, fft_bins=2048, int_time=1):
         gr.hier_block2.__init__(
             self, "Spectro",
                 gr.io_signature(1, 1, gr.sizeof_gr_complex * 1),
-                gr.io_signature(1, 1, gr.sizeof_float * channels),
+                gr.io_signature(1, 1, gr.sizeof_float * fft_bins),
         )
 
         ##################################################
         # Parameters
         ##################################################
         self.bandwidth = bandwidth
-        self.channels = channels
-        self.t_sample = t_sample
+        self.fft_bins = fft_bins
+        self.int_time = int_time
 
         ##################################################
         # Variables
         ##################################################
-        self.sinc_sample_locations = sinc_sample_locations = np.arange(-4.0 * np.pi / 2.0, +4.0 * np.pi / 2.0, np.pi / channels)
+        self.sinc_sample_locations = sinc_sample_locations = np.arange(-4.0 * np.pi / 2.0, +4.0 * np.pi / 2.0, np.pi / fft_bins)
         self.sinc = sinc = np.sinc(sinc_sample_locations / np.pi)
-        self.custom_window = custom_window = sinc * np.hamming(4 * channels)
+        self.custom_window = custom_window = sinc * np.hamming(4 * fft_bins)
 
         ##################################################
         # Blocks
         ##################################################
-        self.blocks_stream_to_vector_3 = blocks.stream_to_vector(gr.sizeof_gr_complex * 1, channels)
-        self.blocks_stream_to_vector_2 = blocks.stream_to_vector(gr.sizeof_gr_complex * 1, channels)
-        self.blocks_stream_to_vector_1 = blocks.stream_to_vector(gr.sizeof_gr_complex * 1, channels)
-        self.blocks_stream_to_vector_0 = blocks.stream_to_vector(gr.sizeof_gr_complex * 1, channels)
-        self.blocks_multiply_const_vcc_3 = blocks.multiply_const_vcc(custom_window[: +channels])
-        self.blocks_multiply_const_vcc_2 = blocks.multiply_const_vcc(custom_window[1 * channels: 2 * channels])
-        self.blocks_multiply_const_vcc_1 = blocks.multiply_const_vcc(custom_window[2 * channels: 3 * channels])
-        self.blocks_multiply_const_vcc_0 = blocks.multiply_const_vcc(custom_window[-channels: ])
-        self.blocks_integrate_ff_0 = blocks.integrate_ff(int(t_sample * bandwidth/channels), channels)
-        self.blocks_fft_vcc_0 = fft.fft_vcc(channels, True, window.blackmanharris(channels), True, 1)
-        self.blocks_delay_3 = blocks.delay(gr.sizeof_gr_complex * 1, channels * 3)
-        self.blocks_delay_2 = blocks.delay(gr.sizeof_gr_complex * 1, channels * 2)
-        self.blocks_delay_1 = blocks.delay(gr.sizeof_gr_complex * 1, channels * 1)
-        self.blocks_delay_0 = blocks.delay(gr.sizeof_gr_complex * 1, channels * 0)
-        self.blocks_complex_to_mag_squared_0 = blocks.complex_to_mag_squared(channels)
-        self.blocks_add_vcc_0 = blocks.add_vcc(channels)
+        self.blocks_stream_to_vector_3 = blocks.stream_to_vector(gr.sizeof_gr_complex * 1, fft_bins)
+        self.blocks_stream_to_vector_2 = blocks.stream_to_vector(gr.sizeof_gr_complex * 1, fft_bins)
+        self.blocks_stream_to_vector_1 = blocks.stream_to_vector(gr.sizeof_gr_complex * 1, fft_bins)
+        self.blocks_stream_to_vector_0 = blocks.stream_to_vector(gr.sizeof_gr_complex * 1, fft_bins)
+        self.blocks_multiply_const_vcc_3 = blocks.multiply_const_vcc(custom_window[: +fft_bins])
+        self.blocks_multiply_const_vcc_2 = blocks.multiply_const_vcc(custom_window[1 * fft_bins: 2 * fft_bins])
+        self.blocks_multiply_const_vcc_1 = blocks.multiply_const_vcc(custom_window[2 * fft_bins: 3 * fft_bins])
+        self.blocks_multiply_const_vcc_0 = blocks.multiply_const_vcc(custom_window[-fft_bins: ])
+        self.blocks_integrate_ff_0 = blocks.integrate_ff(int(int_time * bandwidth / fft_bins), fft_bins)
+        self.blocks_fft_vcc_0 = fft.fft_vcc(fft_bins, True, window.blackmanharris(fft_bins), True, 1)
+        self.blocks_delay_3 = blocks.delay(gr.sizeof_gr_complex * 1, fft_bins * 3)
+        self.blocks_delay_2 = blocks.delay(gr.sizeof_gr_complex * 1, fft_bins * 2)
+        self.blocks_delay_1 = blocks.delay(gr.sizeof_gr_complex * 1, fft_bins * 1)
+        self.blocks_delay_0 = blocks.delay(gr.sizeof_gr_complex * 1, fft_bins * 0)
+        self.blocks_complex_to_mag_squared_0 = blocks.complex_to_mag_squared(fft_bins)
+        self.blocks_add_vcc_0 = blocks.add_vcc(fft_bins)
 
 
         ##################################################
@@ -102,33 +102,33 @@ class spectro(gr.hier_block2):
 
     ####################################################################################################################
 
-    def get_channels(self):
-        return self.channels
+    def get_fft_bins(self):
+        return self.fft_bins
 
     ####################################################################################################################
 
-    def set_channels(self, channels):
-        self.channels = channels
-        self.set_custom_window(self.sinc * np.hamming(4 * self.channels))
-        self.set_sinc_sample_locations(np.arange(-4.0 * np.pi / 2.0, +4.0 * np.pi / 2.0, np.pi / self.channels))
-        self.blocks_delay_0.set_dly(self.channels * 0)
-        self.blocks_delay_1.set_dly(self.channels * 1)
-        self.blocks_delay_2.set_dly(self.channels * 2)
-        self.blocks_delay_3.set_dly(self.channels * 3)
-        self.blocks_multiply_const_vcc_0.set_k(self.custom_window[-self.channels: ])
-        self.blocks_multiply_const_vcc_1.set_k(self.custom_window[2 * self.channels: 3 * self.channels])
-        self.blocks_multiply_const_vcc_2.set_k(self.custom_window[1 * self.channels: 2 * self.channels])
-        self.blocks_multiply_const_vcc_3.set_k(self.custom_window[: +self.channels])
+    def set_fft_bins(self, fft_bins):
+        self.fft_bins = fft_bins
+        self.set_custom_window(self.sinc * np.hamming(4 * self.fft_bins))
+        self.set_sinc_sample_locations(np.arange(-4.0 * np.pi / 2.0, +4.0 * np.pi / 2.0, np.pi / self.fft_bins))
+        self.blocks_delay_0.set_dly(self.fft_bins * 0)
+        self.blocks_delay_1.set_dly(self.fft_bins * 1)
+        self.blocks_delay_2.set_dly(self.fft_bins * 2)
+        self.blocks_delay_3.set_dly(self.fft_bins * 3)
+        self.blocks_multiply_const_vcc_0.set_k(self.custom_window[-self.fft_bins: ])
+        self.blocks_multiply_const_vcc_1.set_k(self.custom_window[2 * self.fft_bins: 3 * self.fft_bins])
+        self.blocks_multiply_const_vcc_2.set_k(self.custom_window[1 * self.fft_bins: 2 * self.fft_bins])
+        self.blocks_multiply_const_vcc_3.set_k(self.custom_window[: +self.fft_bins])
 
     ####################################################################################################################
 
-    def get_t_sample(self):
-        return self.t_sample
+    def get_int_time(self):
+        return self.int_time
 
     ####################################################################################################################
 
-    def set_t_sample(self, t_sample):
-        self.t_sample = t_sample
+    def set_int_time(self, int_time):
+        self.int_time = int_time
 
     ####################################################################################################################
 
@@ -150,7 +150,7 @@ class spectro(gr.hier_block2):
 
     def set_sinc(self, sinc):
         self.sinc = sinc
-        self.set_custom_window(self.sinc * np.hamming(4 * self.channels))
+        self.set_custom_window(self.sinc * np.hamming(4 * self.fft_bins))
         self.set_sinc(np.sinc(self.sinc_sample_locations / np.pi))
 
     ####################################################################################################################
@@ -162,9 +162,9 @@ class spectro(gr.hier_block2):
 
     def set_custom_window(self, custom_window):
         self.custom_window = custom_window
-        self.blocks_multiply_const_vcc_0.set_k(self.custom_window[-self.channels: ])
-        self.blocks_multiply_const_vcc_1.set_k(self.custom_window[2 * self.channels: 3 * self.channels])
-        self.blocks_multiply_const_vcc_2.set_k(self.custom_window[1 * self.channels: 2 * self.channels])
-        self.blocks_multiply_const_vcc_3.set_k(self.custom_window[: +self.channels])
+        self.blocks_multiply_const_vcc_0.set_k(self.custom_window[-self.fft_bins: ])
+        self.blocks_multiply_const_vcc_1.set_k(self.custom_window[2 * self.fft_bins: 3 * self.fft_bins])
+        self.blocks_multiply_const_vcc_2.set_k(self.custom_window[1 * self.fft_bins: 2 * self.fft_bins])
+        self.blocks_multiply_const_vcc_3.set_k(self.custom_window[: +self.fft_bins])
 
 ########################################################################################################################

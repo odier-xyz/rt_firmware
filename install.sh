@@ -8,7 +8,7 @@ Description=Radio Telescope
 After=network.target
 
 [Service]
-ExecStart=/home/rock/rt/rt.sh
+ExecStart=/home/rock/rt/bin/rt
 WorkingDirectory=/home/rock/rt
 StandardOutput=null
 StandardError=inherit

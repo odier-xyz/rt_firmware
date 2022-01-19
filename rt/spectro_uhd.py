@@ -9,10 +9,12 @@
 # Copyright (c) 2022-XXXX Jérôme Odier
 ########################################################################################################################
 
-import correctiq
+try:
+    from gnuradio import uhd
+except ModuleNotFoundError as e:
+    print(e.__str__())
 
 from gnuradio import gr
-from gnuradio import uhd
 from gnuradio import blocks
 from gnuradio import zeromq
 
@@ -24,28 +26,29 @@ class spectro_uhd(gr.top_block):
 
     ####################################################################################################################
 
-    def __init__(self, bandwidth=2e6, channels=4096, frequency=1420e6, rx_gain=30, t_sample=1):
-        gr.top_block.__init__(self, "Spectro UHD")
+    def __init__(self, bandwidth=2e6, clk_src='internal', fft_bins=2048, frequency=1420e6, int_time=1, rx_gain=30):
+        gr.top_block.__init__(self, "Spectro UHD", catch_exceptions=True)
 
         ##################################################
         # Parameters
         ##################################################
         self.bandwidth = bandwidth
-        self.channels = channels
+        self.clk_src = clk_src
+        self.fft_bins = fft_bins
         self.frequency = frequency
+        self.int_time = int_time
         self.rx_gain = rx_gain
-        self.t_sample = t_sample
 
         ##################################################
         # Blocks
         ##################################################
         self.spectro_0 = spectro(
-            bandwidth=2e6,
-            channels=4096,
-            t_sample=1,
+            bandwidth=bandwidth,
+            fft_bins=fft_bins,
+            int_time=1,
         )
-        self.correctiq_correctiq_0 = correctiq.correctiq()
-        self.blocks_zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_float, channels, 'tcp://*:50001', 100, False, -1)
+        self.blocks_zeromq_pub_sink_0_0 = zeromq.pub_sink(gr.sizeof_gr_complex, 1, 'tcp://*:50000', 100, False, -1, '')
+        self.blocks_zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_float, fft_bins, 'tcp://*:50001', 100, False, -1, '')
         self.blocks_uhd_usrp_source_0 = uhd.usrp_source(
             ",".join(("", "")),
             uhd.stream_args(
@@ -54,18 +57,24 @@ class spectro_uhd(gr.top_block):
                 channels=list(range(0,1)),
             ),
         )
-        self.blocks_uhd_usrp_source_0.set_center_freq(frequency, 0)
-        self.blocks_uhd_usrp_source_0.set_gain(rx_gain, 0)
-        self.blocks_uhd_usrp_source_0.set_antenna('RX2', 0)
+        self.blocks_uhd_usrp_source_0.set_clock_source(clk_src, 0)
         self.blocks_uhd_usrp_source_0.set_samp_rate(bandwidth)
-        self.blocks_uhd_usrp_source_0.set_time_unknown_pps(uhd.time_spec())
+        self.blocks_uhd_usrp_source_0.set_time_unknown_pps(uhd.time_spec(0))
+
+        self.blocks_uhd_usrp_source_0.set_center_freq(frequency, 0)
+        self.blocks_uhd_usrp_source_0.set_antenna('RX2', 0)
+        self.blocks_uhd_usrp_source_0.set_gain(rx_gain, 0)
+        self.blocks_integrate_xx_0 = blocks.integrate_cc(100, 1)
+        self.blocks_correctiq_0 = blocks.correctiq()
 
 
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.blocks_uhd_usrp_source_0, 0), (self.correctiq_correctiq_0, 0))
-        self.connect((self.correctiq_correctiq_0, 0), (self.spectro_0, 0))
+        self.connect((self.blocks_correctiq_0, 0), (self.blocks_integrate_xx_0, 0))
+        self.connect((self.blocks_correctiq_0, 0), (self.spectro_0, 0))
+        self.connect((self.blocks_integrate_xx_0, 0), (self.blocks_zeromq_pub_sink_0_0, 0))
+        self.connect((self.blocks_uhd_usrp_source_0, 0), (self.blocks_correctiq_0, 0))
         self.connect((self.spectro_0, 0), (self.blocks_zeromq_pub_sink_0, 0))
 
 
@@ -79,16 +88,28 @@ class spectro_uhd(gr.top_block):
     def set_bandwidth(self, bandwidth):
         self.bandwidth = bandwidth
         self.blocks_uhd_usrp_source_0.set_samp_rate(self.bandwidth)
+        self.spectro_0.set_bandwidth(self.bandwidth)
 
     ####################################################################################################################
 
-    def get_channels(self):
-        return self.channels
+    def get_clk_src(self):
+        return self.clk_src
 
     ####################################################################################################################
 
-    def set_channels(self, channels):
-        self.channels = channels
+    def set_clk_src(self, clk_src):
+        self.clk_src = clk_src
+
+    ####################################################################################################################
+
+    def get_fft_bins(self):
+        return self.fft_bins
+
+    ####################################################################################################################
+
+    def set_fft_bins(self, fft_bins):
+        self.fft_bins = fft_bins
+        self.spectro_0.set_fft_bins(self.fft_bins)
 
     ####################################################################################################################
 
@@ -103,6 +124,16 @@ class spectro_uhd(gr.top_block):
 
     ####################################################################################################################
 
+    def get_int_time(self):
+        return self.int_time
+
+    ####################################################################################################################
+
+    def set_int_time(self, int_time):
+        self.int_time = int_time
+
+    ####################################################################################################################
+
     def get_rx_gain(self):
         return self.rx_gain
 
@@ -111,15 +142,5 @@ class spectro_uhd(gr.top_block):
     def set_rx_gain(self, rx_gain):
         self.rx_gain = rx_gain
         self.blocks_uhd_usrp_source_0.set_gain(self.rx_gain, 0)
-
-    ####################################################################################################################
-
-    def get_t_sample(self):
-        return self.t_sample
-
-    ####################################################################################################################
-
-    def set_t_sample(self, t_sample):
-        self.t_sample = t_sample
 
 ########################################################################################################################
