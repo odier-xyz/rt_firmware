@@ -26,7 +26,7 @@ class spectro_uhd(gr.top_block):
 
     ####################################################################################################################
 
-    def __init__(self, bandwidth=2e6, clk_src='internal', fft_bins=2048, frequency=1420e6, int_time=1, rx_gain=30):
+    def __init__(self, bandwidth=2e6, clk_src='internal', fft_bins=2048, frequency=1420e6, int_time=1, port1=50001, port2=50002, rx_gain=30):
         gr.top_block.__init__(self, "Spectro UHD", catch_exceptions=True)
 
         ##################################################
@@ -37,6 +37,8 @@ class spectro_uhd(gr.top_block):
         self.fft_bins = fft_bins
         self.frequency = frequency
         self.int_time = int_time
+        self.port1 = port1
+        self.port2 = port2
         self.rx_gain = rx_gain
 
         ##################################################
@@ -47,8 +49,8 @@ class spectro_uhd(gr.top_block):
             fft_bins=fft_bins,
             int_time=1,
         )
-        self.blocks_zeromq_pub_sink_0_0 = zeromq.pub_sink(gr.sizeof_gr_complex, 1, 'tcp://*:50000', 100, False, -1, '')
-        self.blocks_zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_float, fft_bins, 'tcp://*:50001', 100, False, -1, '')
+        self.blocks_zeromq_pub_sink_0_0 = zeromq.pub_sink(gr.sizeof_gr_complex, 1, 'tcp://*:{}'.format(port1), 100, False, -1, '')
+        self.blocks_zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_float, fft_bins, 'tcp://*:{}'.format(port2), 100, False, -1, '')
         self.blocks_uhd_usrp_source_0 = uhd.usrp_source(
             ",".join(("", "")),
             uhd.stream_args(
@@ -64,16 +66,14 @@ class spectro_uhd(gr.top_block):
         self.blocks_uhd_usrp_source_0.set_center_freq(frequency, 0)
         self.blocks_uhd_usrp_source_0.set_antenna('RX2', 0)
         self.blocks_uhd_usrp_source_0.set_gain(rx_gain, 0)
-        self.blocks_integrate_xx_0 = blocks.integrate_cc(100, 1)
         self.blocks_correctiq_0 = blocks.correctiq()
 
 
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.blocks_correctiq_0, 0), (self.blocks_integrate_xx_0, 0))
+        self.connect((self.blocks_correctiq_0, 0), (self.blocks_zeromq_pub_sink_0_0, 0))
         self.connect((self.blocks_correctiq_0, 0), (self.spectro_0, 0))
-        self.connect((self.blocks_integrate_xx_0, 0), (self.blocks_zeromq_pub_sink_0_0, 0))
         self.connect((self.blocks_uhd_usrp_source_0, 0), (self.blocks_correctiq_0, 0))
         self.connect((self.spectro_0, 0), (self.blocks_zeromq_pub_sink_0, 0))
 
@@ -131,6 +131,26 @@ class spectro_uhd(gr.top_block):
 
     def set_int_time(self, int_time):
         self.int_time = int_time
+
+    ####################################################################################################################
+
+    def get_port1(self):
+        return self.port1
+
+    ####################################################################################################################
+
+    def set_port1(self, port1):
+        self.port1 = port1
+
+    ####################################################################################################################
+
+    def get_port2(self):
+        return self.port2
+
+    ####################################################################################################################
+
+    def set_port2(self, port2):
+        self.port2 = port2
 
     ####################################################################################################################
 

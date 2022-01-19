@@ -15,6 +15,7 @@ except ModuleNotFoundError as e:
     print(e.__str__())
 
 from gnuradio import gr
+from gnuradio import analog # BERK #
 from gnuradio import blocks
 from gnuradio import zeromq
 
@@ -26,7 +27,7 @@ class spectro_osmo(gr.top_block):
 
     ####################################################################################################################
 
-    def __init__(self, bandwidth=2e6, clk_src='external', fft_bins=2048, frequency=1420e6, int_time=1, rx_gain=30):
+    def __init__(self, bandwidth=2e6, clk_src='external', fft_bins=2048, frequency=1420e6, int_time=1, port1=50001, port2=50002, rx_gain=30):
         gr.top_block.__init__(self, "Spectro OsmoSDR", catch_exceptions=True)
 
         ##################################################
@@ -37,6 +38,8 @@ class spectro_osmo(gr.top_block):
         self.fft_bins = fft_bins
         self.frequency = frequency
         self.int_time = int_time
+        self.port1 = port1
+        self.port2 = port2
         self.rx_gain = rx_gain
 
         ##################################################
@@ -47,12 +50,11 @@ class spectro_osmo(gr.top_block):
             fft_bins=fft_bins,
             int_time=1,
         )
-        self.blocks_zeromq_pub_sink_0_0 = zeromq.pub_sink(gr.sizeof_gr_complex, 1, 'tcp://*:50000', 100, False, -1, '')
-        self.blocks_zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_float, fft_bins, 'tcp://*:50001', 100, False, -1, '')
+        self.blocks_zeromq_pub_sink_0_0 = zeromq.pub_sink(gr.sizeof_gr_complex, 1, 'tcp://*:{}'.format(port1), 100, False, -1, '')
+        self.blocks_zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_float, fft_bins, 'tcp://*:{}'.format(port2), 100, False, -1, '')
         self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex * 1, bandwidth,True)
-        self.blocks_integrate_xx_0 = blocks.integrate_cc(100, 1)
         self.blocks_add_xx_0 = blocks.add_vcc(1)
-        self.analog_sig_source_x_0 = analog.sig_source_c(bandwidth, analog.GR_COS_WAVE, frequency, 0.001, 0, 0)
+        self.analog_sig_source_x_0 = analog.sig_source_c(bandwidth, analog.GR_COS_WAVE, 1420405751, 0.001, 0, 0)
         self.analog_fastnoise_source_x_0 = analog.fastnoise_source_c(analog.GR_GAUSSIAN, 0.001, 0, 8192)
 
 
@@ -62,8 +64,7 @@ class spectro_osmo(gr.top_block):
         self.connect((self.analog_fastnoise_source_x_0, 0), (self.blocks_add_xx_0, 1))
         self.connect((self.analog_sig_source_x_0, 0), (self.blocks_add_xx_0, 0))
         self.connect((self.blocks_add_xx_0, 0), (self.blocks_throttle_0, 0))
-        self.connect((self.blocks_integrate_xx_0, 0), (self.blocks_zeromq_pub_sink_0_0, 0))
-        self.connect((self.blocks_throttle_0, 0), (self.blocks_integrate_xx_0, 0))
+        self.connect((self.blocks_throttle_0, 0), (self.blocks_zeromq_pub_sink_0_0, 0))
         self.connect((self.blocks_throttle_0, 0), (self.spectro_0, 0))
         self.connect((self.spectro_0, 0), (self.blocks_zeromq_pub_sink_0, 0))
 
@@ -111,7 +112,6 @@ class spectro_osmo(gr.top_block):
 
     def set_frequency(self, frequency):
         self.frequency = frequency
-        self.analog_sig_source_x_0.set_frequency(self.frequency)
 
     ####################################################################################################################
 
@@ -122,6 +122,26 @@ class spectro_osmo(gr.top_block):
 
     def set_int_time(self, int_time):
         self.int_time = int_time
+
+    ####################################################################################################################
+
+    def get_port1(self):
+        return self.port1
+
+    ####################################################################################################################
+
+    def set_port1(self, port1):
+        self.port1 = port1
+
+    ####################################################################################################################
+
+    def get_port2(self):
+        return self.port2
+
+    ####################################################################################################################
+
+    def set_port2(self, port2):
+        self.port2 = port2
 
     ####################################################################################################################
 

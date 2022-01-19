@@ -28,7 +28,7 @@ options:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [16, 8.0]
+    coordinate: [16, 12.0]
     rotation: 0
     state: enabled
 
@@ -47,7 +47,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [16, 180.0]
+    coordinate: [96, 116.0]
     rotation: 0
     state: enabled
 - name: blocks_correctiq_0
@@ -62,25 +62,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [376, 140.0]
-    rotation: 0
-    state: true
-- name: blocks_integrate_xx_0
-  id: blocks_integrate_xx
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    decim: '100'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    type: complex
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [544, 228.0]
+    coordinate: [392, 140.0]
     rotation: 0
     state: true
 - name: blocks_uhd_usrp_source_0
@@ -516,13 +498,13 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [208, 112.0]
+    coordinate: [224, 112.0]
     rotation: 0
     state: true
 - name: blocks_zeromq_pub_sink_0
   id: zeromq_pub_sink
   parameters:
-    address: tcp://*:50001
+    address: '''tcp://*:{}''.format(port2)'
     affinity: ''
     alias: ''
     comment: ''
@@ -536,13 +518,13 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [664, 120.0]
+    coordinate: [680, 208.0]
     rotation: 0
     state: true
 - name: blocks_zeromq_pub_sink_0_0
   id: zeromq_pub_sink
   parameters:
-    address: tcp://*:50000
+    address: '''tcp://*:{}''.format(port1)'
     affinity: ''
     alias: ''
     comment: ''
@@ -556,7 +538,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [664, 216.0]
+    coordinate: [680, 128.0]
     rotation: 0
     state: true
 - name: clk_src
@@ -573,7 +555,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [144, 12.0]
+    coordinate: [16, 116.0]
     rotation: 0
     state: true
 - name: fft_bins
@@ -590,7 +572,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [16, 108.0]
+    coordinate: [16, 188.0]
     rotation: 0
     state: enabled
 - name: frequency
@@ -607,7 +589,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [16, 252.0]
+    coordinate: [96, 188.0]
     rotation: 0
     state: enabled
 - name: int_time
@@ -624,9 +606,43 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [16, 396.0]
+    coordinate: [16, 324.0]
     rotation: 0
     state: enabled
+- name: port1
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '50001'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [144, 12.0]
+    rotation: 0
+    state: true
+- name: port2
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '50002'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [224, 12.0]
+    rotation: 0
+    state: true
 - name: rx_gain
   id: parameter
   parameters:
@@ -641,7 +657,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [16, 324.0]
+    coordinate: [16, 260.0]
     rotation: 0
     state: enabled
 - name: spectro_0
@@ -659,14 +675,13 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [544, 132.0]
+    coordinate: [560, 220.0]
     rotation: 0
     state: true
 
 connections:
-- [blocks_correctiq_0, '0', blocks_integrate_xx_0, '0']
+- [blocks_correctiq_0, '0', blocks_zeromq_pub_sink_0_0, '0']
 - [blocks_correctiq_0, '0', spectro_0, '0']
-- [blocks_integrate_xx_0, '0', blocks_zeromq_pub_sink_0_0, '0']
 - [blocks_uhd_usrp_source_0, '0', blocks_correctiq_0, '0']
 - [spectro_0, '0', blocks_zeromq_pub_sink_0, '0']
 

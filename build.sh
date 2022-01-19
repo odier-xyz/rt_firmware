@@ -97,6 +97,7 @@ except ModuleNotFoundError as e:
     print(e.__str__())
 
 from gnuradio import gr
+from gnuradio import analog # BERK #
 from gnuradio import blocks
 from gnuradio import zeromq
 
