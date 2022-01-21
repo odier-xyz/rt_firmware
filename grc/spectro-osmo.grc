@@ -114,7 +114,7 @@ blocks:
     label: ''
     short_id: ''
     type: str
-    value: external
+    value: internal
   states:
     bus_sink: false
     bus_source: false
@@ -589,7 +589,7 @@ blocks:
     bandwidth: bandwidth
     comment: ''
     fft_bins: fft_bins
-    int_time: '1'
+    int_time: int_time
     maxoutbuf: '0'
     minoutbuf: '0'
   states:

@@ -606,7 +606,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [16, 324.0]
+    coordinate: [16, 332.0]
     rotation: 0
     state: enabled
 - name: port1
@@ -668,7 +668,7 @@ blocks:
     bandwidth: bandwidth
     comment: ''
     fft_bins: fft_bins
-    int_time: '1'
+    int_time: int_time
     maxoutbuf: '0'
     minoutbuf: '0'
   states:

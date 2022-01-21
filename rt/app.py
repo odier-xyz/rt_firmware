@@ -11,7 +11,7 @@
 
 import os, sys, time, flask, psutil, signal, threading, subprocess
 
-from .spectro_uhd import spectro_uhd
+from .spectro_uhd  import spectro_uhd
 from .spectro_osmo import spectro_osmo
 from .spectro_fake import spectro_fake
 
@@ -27,10 +27,6 @@ FFT_BINS_MIN = 0
 FFT_BINS_MAX = 8192
 FFT_BINS_DEFAULT = 4096
 
-INT_TIME_MIN = 1
-INT_TIME_MAX = 100
-INT_TIME_DEFAULT = 1
-
 BANDWIDTH_MIN = 200_000.0
 BANDWIDTH_MAX = 56_000_000.0
 BANDWIDTH_DEFAULT = 2_000_000.0
@@ -38,6 +34,10 @@ BANDWIDTH_DEFAULT = 2_000_000.0
 FREQUENCY_MIN = 70_000_000.0
 FREQUENCY_MAX = 6_000_000_000.0
 FREQUENCY_DEFAULT = 1_420_000_000.0
+
+INT_TIME_MIN = 1
+INT_TIME_MAX = 100
+INT_TIME_DEFAULT = 1
 
 RX_GAIN_MIN = 0.0
 RX_GAIN_MAX = 76.0
@@ -55,7 +55,7 @@ class SpectroThread(threading.Thread):
 
     ####################################################################################################################
 
-    def __init__(self, clk_src, fft_bins, int_time, bandwidth, frequency, rx_gain):
+    def __init__(self, clk_src, fft_bins, bandwidth, frequency, int_time, rx_gain):
 
         ################################################################################################################
 
@@ -72,9 +72,9 @@ class SpectroThread(threading.Thread):
             self.block = spectro_uhd(
                 clk_src = clk_src,
                 fft_bins = fft_bins,
-                int_time = int_time,
                 bandwidth = bandwidth,
                 frequency = frequency,
+                int_time = int_time,
                 rx_gain = rx_gain
             )
 
@@ -83,9 +83,9 @@ class SpectroThread(threading.Thread):
             self.block = spectro_osmo(
                 clk_src = clk_src,
                 fft_bins = fft_bins,
-                int_time = int_time,
                 bandwidth = bandwidth,
                 frequency = frequency,
+                int_time = int_time,
                 rx_gain = rx_gain
             )
 
@@ -94,9 +94,9 @@ class SpectroThread(threading.Thread):
             self.block = spectro_fake(
                 clk_src = clk_src,
                 fft_bins = fft_bins,
-                int_time = int_time,
                 bandwidth = bandwidth,
                 frequency = frequency,
+                int_time = int_time,
                 rx_gain = rx_gain
             )
 
@@ -166,9 +166,10 @@ def route_st_status():
         spectro = {
             'status': 'stopped',
             'clk_src': None,
-            'bandwidth': None,
             'fft_bins': None,
+            'bandwidth': None,
             'frequency': None,
+            'int_time': None,
             'rx_gain': None,
         }
 
@@ -177,10 +178,10 @@ def route_st_status():
         spectro = {
             'status': 'started',
             'clk_src': curr_spectro.block.get_clk_src(),
-            'bandwidth': curr_spectro.block.get_bandwidth(),
             'fft_bins': curr_spectro.block.get_fft_bins(),
-            'int_time': curr_spectro.block.get_int_time(),
+            'bandwidth': curr_spectro.block.get_bandwidth(),
             'frequency': curr_spectro.block.get_frequency(),
+            'int_time': curr_spectro.block.get_int_time(),
             'rx_gain': curr_spectro.block.get_rx_gain(),
         }
 
@@ -249,21 +250,6 @@ def route_rt_spectro_start():
 
     try:
 
-        int_time = int(flask.request.args.get('int_time', ''))
-
-        if   int_time < INT_TIME_MIN:
-            int_time = INT_TIME_MIN
-        elif int_time > INT_TIME_MAX:
-            int_time = INT_TIME_MAX
-
-    except ValueError as e:
-
-        int_time = INT_TIME_DEFAULT
-
-    ####################################################################################################################
-
-    try:
-
         bandwidth = float(flask.request.args.get('bandwidth', ''))
 
         if   bandwidth < BANDWIDTH_MIN:
@@ -294,6 +280,21 @@ def route_rt_spectro_start():
 
     try:
 
+        int_time = int(flask.request.args.get('int_time', ''))
+
+        if   int_time < INT_TIME_MIN:
+            int_time = INT_TIME_MIN
+        elif int_time > INT_TIME_MAX:
+            int_time = INT_TIME_MAX
+
+    except ValueError as e:
+
+        int_time = INT_TIME_DEFAULT
+
+    ####################################################################################################################
+
+    try:
+
         rx_gain = float(flask.request.args.get('rx_gain', ''))
 
         if   rx_gain < RX_GAIN_MIN:
@@ -314,9 +315,9 @@ def route_rt_spectro_start():
             curr_spectro = SpectroThread(
                 clk_src = clk_src,
                 fft_bins = fft_bins,
-                int_time = int_time,
                 bandwidth = bandwidth,
                 frequency = frequency,
+                int_time = int_time,
                 rx_gain = rx_gain,
             )
 
