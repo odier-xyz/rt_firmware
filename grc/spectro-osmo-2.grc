@@ -11,7 +11,7 @@ options:
     gen_linking: dynamic
     generate_options: no_gui
     hier_block_src_path: '.:'
-    id: spectro_osmo
+    id: spectro_osmo_2
     max_nouts: '0'
     output_language: python
     placement: (0,0)
@@ -275,7 +275,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    clock_source0: ''
+    clock_source0: clk_src
     clock_source1: ''
     clock_source2: ''
     clock_source3: ''
@@ -380,7 +380,7 @@ blocks:
     freq7: 100e6
     freq8: 100e6
     freq9: 100e6
-    gain0: '10'
+    gain0: rx_gain
     gain1: '10'
     gain10: '10'
     gain11: '10'
@@ -527,7 +527,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [256, 88.0]
+    coordinate: [256, 84.0]
     rotation: 0
     state: true
 - name: port1

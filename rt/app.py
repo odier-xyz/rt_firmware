@@ -11,9 +11,12 @@
 
 import os, sys, time, flask, psutil, signal, threading, subprocess
 
-from .spectro_uhd  import spectro_uhd
-from .spectro_osmo import spectro_osmo
-from .spectro_fake import spectro_fake
+from .spectro_uhd_1  import spectro_uhd_1
+from .spectro_uhd_2  import spectro_uhd_2
+from .spectro_osmo_1 import spectro_osmo_1
+from .spectro_osmo_2 import spectro_osmo_2
+from .spectro_fake_1 import spectro_fake_1
+from .spectro_fake_2 import spectro_fake_2
 
 ########################################################################################################################
 
@@ -69,7 +72,7 @@ class SpectroThread(threading.Thread):
 
         if   interface == 'uhd':
 
-            self.block = spectro_uhd(
+            self.block = spectro_uhd_1(
                 clk_src = clk_src,
                 fft_bins = fft_bins,
                 bandwidth = bandwidth,
@@ -80,7 +83,7 @@ class SpectroThread(threading.Thread):
 
         elif interface == 'osmo':
 
-            self.block = spectro_osmo(
+            self.block = spectro_osmo_1(
                 clk_src = clk_src,
                 fft_bins = fft_bins,
                 bandwidth = bandwidth,
@@ -91,7 +94,7 @@ class SpectroThread(threading.Thread):
 
         else:
 
-            self.block = spectro_fake(
+            self.block = spectro_fake_1(
                 clk_src = clk_src,
                 fft_bins = fft_bins,
                 bandwidth = bandwidth,
