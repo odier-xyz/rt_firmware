@@ -50,7 +50,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [440.0, 352]
+    coordinate: [424.0, 352]
     rotation: 90
     state: true
 - name: analog_sig_source_x_0
@@ -72,7 +72,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [308.0, 352]
+    coordinate: [316.0, 352]
     rotation: 90
     state: true
 - name: bandwidth
