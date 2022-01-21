@@ -26,7 +26,7 @@ class spectro_osmo(gr.top_block):
 
     ####################################################################################################################
 
-    def __init__(self, bandwidth=2e6, clk_src='external', fft_bins=2048, frequency=1420e6, int_time=1, port1=50001, port2=50002, rx_gain=30):
+    def __init__(self, bandwidth=2e6, clk_src='internal', fft_bins=2048, frequency=1420e6, int_time=1, port1=50001, port2=50002, rx_gain=30):
         gr.top_block.__init__(self, "Spectro OsmoSDR", catch_exceptions=True)
 
         ##################################################
@@ -47,7 +47,7 @@ class spectro_osmo(gr.top_block):
         self.spectro_0 = spectro(
             bandwidth=bandwidth,
             fft_bins=fft_bins,
-            int_time=1,
+            int_time=int_time,
         )
         self.osmosdr_source_0 = osmosdr.source(
             args="numchan=" + str(1) + " " + ""
@@ -131,6 +131,7 @@ class spectro_osmo(gr.top_block):
 
     def set_int_time(self, int_time):
         self.int_time = int_time
+        self.spectro_0.set_int_time(self.int_time)
 
     ####################################################################################################################
 

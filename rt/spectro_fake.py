@@ -22,8 +22,8 @@ class spectro_fake(gr.top_block):
 
     ####################################################################################################################
 
-    def __init__(self, bandwidth=2e6, clk_src='external', fft_bins=2048, frequency=1420e6, int_time=1, port1=50001, port2=50002, rx_gain=30):
-        gr.top_block.__init__(self, "Spectro Faake", catch_exceptions=True)
+    def __init__(self, bandwidth=2e6, clk_src='internal', fft_bins=2048, frequency=1420e6, int_time=1, port1=50001, port2=50002, rx_gain=30):
+        gr.top_block.__init__(self, "Spectro Fake", catch_exceptions=True)
 
         ##################################################
         # Parameters
@@ -43,7 +43,7 @@ class spectro_fake(gr.top_block):
         self.spectro_0 = spectro(
             bandwidth=bandwidth,
             fft_bins=fft_bins,
-            int_time=1,
+            int_time=int_time,
         )
         self.blocks_zeromq_pub_sink_0_0 = zeromq.pub_sink(gr.sizeof_gr_complex, 1, 'tcp://*:{}'.format(port1), 100, False, -1, '')
         self.blocks_zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_float, fft_bins, 'tcp://*:{}'.format(port2), 100, False, -1, '')
@@ -117,6 +117,7 @@ class spectro_fake(gr.top_block):
 
     def set_int_time(self, int_time):
         self.int_time = int_time
+        self.spectro_0.set_int_time(self.int_time)
 
     ####################################################################################################################
 
