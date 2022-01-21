@@ -15,6 +15,8 @@ grcc --output grc ./grc/spectro-uhd.grc
 
 grcc --output grc ./grc/spectro-osmo.grc
 
+grcc --output grc ./grc/spectro-fake.grc
+
 ########################################################################################################################
 
 cat > ./rt/spectro.py << EOF
@@ -97,7 +99,6 @@ except ModuleNotFoundError as e:
     print(e.__str__())
 
 from gnuradio import gr
-from gnuradio import analog # BERK #
 from gnuradio import blocks
 from gnuradio import zeromq
 
@@ -112,8 +113,38 @@ EOF
 
 ########################################################################################################################
 
+cat > ./rt/spectro_fake.py << EOF
+# -*- coding:utf-8 -*-
+########################################################################################################################
+# Author: Jerome ODIER
+# Email: jerome@odier.xyz
+# URL: http://odier.xyz/
+#
+# Radio Telescope
+#
+# Copyright (c) 2022-XXXX Jérôme Odier
+########################################################################################################################
+
+from gnuradio import gr
+from gnuradio import analog
+from gnuradio import blocks
+from gnuradio import zeromq
+
+from .spectro import spectro
+
+########################################################################################################################
+
+$(awk '/class spectro/{f=1} /def argument_parser/{f=0} f' ./grc/spectro_fake.py | sed "s/    def/    ####################################################################################################################\n\n    def/" | sed 's/[*]/ * /g' | sed 's/  [*]  / * /g' | sed 's/ [*] :/*:/')
+
+########################################################################################################################
+EOF
+
+########################################################################################################################
+
 rm -f ./grc/spectro_uhd.py
 
 rm -f ./grc/spectro_osmo.py
+
+rm -f ./grc/spectro_fake.py
 
 ########################################################################################################################

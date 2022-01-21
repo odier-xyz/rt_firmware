@@ -62,7 +62,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [392, 140.0]
+    coordinate: [456, 140.0]
     rotation: 0
     state: true
 - name: blocks_uhd_usrp_source_0
@@ -498,7 +498,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [224, 112.0]
+    coordinate: [288, 112.0]
     rotation: 0
     state: true
 - name: blocks_zeromq_pub_sink_0
@@ -518,7 +518,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [680, 208.0]
+    coordinate: [744, 208.0]
     rotation: 0
     state: true
 - name: blocks_zeromq_pub_sink_0_0
@@ -538,7 +538,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [680, 128.0]
+    coordinate: [744, 128.0]
     rotation: 0
     state: true
 - name: clk_src
@@ -675,7 +675,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [560, 220.0]
+    coordinate: [624, 220.0]
     rotation: 0
     state: true
 

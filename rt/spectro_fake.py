@@ -9,12 +9,8 @@
 # Copyright (c) 2022-XXXX Jérôme Odier
 ########################################################################################################################
 
-try:
-    import osmosdr
-except ModuleNotFoundError as e:
-    print(e.__str__())
-
 from gnuradio import gr
+from gnuradio import analog
 from gnuradio import blocks
 from gnuradio import zeromq
 
@@ -22,12 +18,12 @@ from .spectro import spectro
 
 ########################################################################################################################
 
-class spectro_osmo(gr.top_block):
+class spectro_fake(gr.top_block):
 
     ####################################################################################################################
 
     def __init__(self, bandwidth=2e6, clk_src='external', fft_bins=2048, frequency=1420e6, int_time=1, port1=50001, port2=50002, rx_gain=30):
-        gr.top_block.__init__(self, "Spectro OsmoSDR", catch_exceptions=True)
+        gr.top_block.__init__(self, "Spectro Faake", catch_exceptions=True)
 
         ##################################################
         # Parameters
@@ -49,32 +45,22 @@ class spectro_osmo(gr.top_block):
             fft_bins=fft_bins,
             int_time=1,
         )
-        self.osmosdr_source_0 = osmosdr.source(
-            args="numchan=" + str(1) + " " + ""
-        )
-        self.osmosdr_source_0.set_time_unknown_pps(osmosdr.time_spec_t())
-        self.osmosdr_source_0.set_sample_rate(bandwidth)
-        self.osmosdr_source_0.set_center_freq(frequency, 0)
-        self.osmosdr_source_0.set_freq_corr(0, 0)
-        self.osmosdr_source_0.set_dc_offset_mode(0, 0)
-        self.osmosdr_source_0.set_iq_balance_mode(0, 0)
-        self.osmosdr_source_0.set_gain_mode(False, 0)
-        self.osmosdr_source_0.set_gain(10, 0)
-        self.osmosdr_source_0.set_if_gain(20, 0)
-        self.osmosdr_source_0.set_bb_gain(20, 0)
-        self.osmosdr_source_0.set_antenna('', 0)
-        self.osmosdr_source_0.set_bandwidth(0, 0)
         self.blocks_zeromq_pub_sink_0_0 = zeromq.pub_sink(gr.sizeof_gr_complex, 1, 'tcp://*:{}'.format(port1), 100, False, -1, '')
         self.blocks_zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_float, fft_bins, 'tcp://*:{}'.format(port2), 100, False, -1, '')
-        self.blocks_correctiq_0 = blocks.correctiq()
+        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex * 1, bandwidth,True)
+        self.blocks_add_xx_0 = blocks.add_vcc(1)
+        self.analog_sig_source_x_0 = analog.sig_source_c(bandwidth, analog.GR_COS_WAVE, 1420405751, 0.001, 0, 0)
+        self.analog_fastnoise_source_x_0 = analog.fastnoise_source_c(analog.GR_GAUSSIAN, 0.001, 0, 8192)
 
 
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.blocks_correctiq_0, 0), (self.blocks_zeromq_pub_sink_0_0, 0))
-        self.connect((self.blocks_correctiq_0, 0), (self.spectro_0, 0))
-        self.connect((self.osmosdr_source_0, 0), (self.blocks_correctiq_0, 0))
+        self.connect((self.analog_fastnoise_source_x_0, 0), (self.blocks_add_xx_0, 1))
+        self.connect((self.analog_sig_source_x_0, 0), (self.blocks_add_xx_0, 0))
+        self.connect((self.blocks_add_xx_0, 0), (self.blocks_throttle_0, 0))
+        self.connect((self.blocks_throttle_0, 0), (self.blocks_zeromq_pub_sink_0_0, 0))
+        self.connect((self.blocks_throttle_0, 0), (self.spectro_0, 0))
         self.connect((self.spectro_0, 0), (self.blocks_zeromq_pub_sink_0, 0))
 
 
@@ -87,7 +73,8 @@ class spectro_osmo(gr.top_block):
 
     def set_bandwidth(self, bandwidth):
         self.bandwidth = bandwidth
-        self.osmosdr_source_0.set_sample_rate(self.bandwidth)
+        self.analog_sig_source_x_0.set_sampling_freq(self.bandwidth)
+        self.blocks_throttle_0.set_sample_rate(self.bandwidth)
         self.spectro_0.set_bandwidth(self.bandwidth)
 
     ####################################################################################################################
@@ -120,7 +107,6 @@ class spectro_osmo(gr.top_block):
 
     def set_frequency(self, frequency):
         self.frequency = frequency
-        self.osmosdr_source_0.set_center_freq(self.frequency, 0)
 
     ####################################################################################################################
 

@@ -33,48 +33,6 @@ options:
     state: enabled
 
 blocks:
-- name: analog_fastnoise_source_x_0
-  id: analog_fastnoise_source_x
-  parameters:
-    affinity: ''
-    alias: ''
-    amp: '0.001'
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    noise_type: analog.GR_GAUSSIAN
-    samples: '8192'
-    seed: '0'
-    type: complex
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [560, 416.0]
-    rotation: 180
-    state: true
-- name: analog_sig_source_x_0
-  id: analog_sig_source_x
-  parameters:
-    affinity: ''
-    alias: ''
-    amp: '0.001'
-    comment: ''
-    freq: '1420405751'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    offset: '0'
-    phase: '0'
-    samp_rate: bandwidth
-    type: complex
-    waveform: analog.GR_COS_WAVE
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [560, 300.0]
-    rotation: 180
-    state: true
 - name: bandwidth
   id: parameter
   parameters:
@@ -92,42 +50,20 @@ blocks:
     coordinate: [96, 116.0]
     rotation: 0
     state: enabled
-- name: blocks_add_xx_0
-  id: blocks_add_xx
+- name: blocks_correctiq_0
+  id: blocks_correctiq
   parameters:
     affinity: ''
     alias: ''
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    num_inputs: '2'
-    type: complex
-    vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [432, 356.0]
-    rotation: 180
-    state: true
-- name: blocks_throttle_0
-  id: blocks_throttle
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    ignoretag: 'True'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    samples_per_second: bandwidth
-    type: complex
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [348.0, 240]
-    rotation: 90
+    coordinate: [456, 140.0]
+    rotation: 0
     state: true
 - name: blocks_zeromq_pub_sink_0
   id: zeromq_pub_sink
@@ -146,7 +82,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [680, 208.0]
+    coordinate: [744, 208.0]
     rotation: 0
     state: true
 - name: blocks_zeromq_pub_sink_0_0
@@ -166,7 +102,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [680, 128.0]
+    coordinate: [744, 128.0]
     rotation: 0
     state: true
 - name: clk_src
@@ -237,42 +173,8 @@ blocks:
     coordinate: [16, 332.0]
     rotation: 0
     state: enabled
-- name: port1
-  id: parameter
-  parameters:
-    alias: ''
-    comment: ''
-    hide: none
-    label: ''
-    short_id: ''
-    type: intx
-    value: '50001'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [144, 12.0]
-    rotation: 0
-    state: true
-- name: port2
-  id: parameter
-  parameters:
-    alias: ''
-    comment: ''
-    hide: none
-    label: ''
-    short_id: ''
-    type: intx
-    value: '50002'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [224, 12.0]
-    rotation: 0
-    state: true
-- name: rtlsdr_source_0
-  id: rtlsdr_source
+- name: osmosdr_source_0
+  id: osmosdr_source
   parameters:
     affinity: ''
     alias: ''
@@ -478,7 +380,7 @@ blocks:
     freq7: 100e6
     freq8: 100e6
     freq9: 100e6
-    gain0: rx_gain
+    gain0: '10'
     gain1: '10'
     gain10: '10'
     gain11: '10'
@@ -625,7 +527,41 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [160, 128.0]
+    coordinate: [256, 88.0]
+    rotation: 0
+    state: true
+- name: port1
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '50001'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [144, 12.0]
+    rotation: 0
+    state: true
+- name: port2
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '50002'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [224, 12.0]
     rotation: 0
     state: true
 - name: rx_gain
@@ -660,17 +596,14 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [560, 220.0]
+    coordinate: [624, 220.0]
     rotation: 0
     state: true
 
 connections:
-- [analog_fastnoise_source_x_0, '0', blocks_add_xx_0, '1']
-- [analog_sig_source_x_0, '0', blocks_add_xx_0, '0']
-- [blocks_add_xx_0, '0', blocks_throttle_0, '0']
-- [blocks_throttle_0, '0', blocks_zeromq_pub_sink_0_0, '0']
-- [blocks_throttle_0, '0', spectro_0, '0']
-- [rtlsdr_source_0, '0', spectro_0, '0']
+- [blocks_correctiq_0, '0', blocks_zeromq_pub_sink_0_0, '0']
+- [blocks_correctiq_0, '0', spectro_0, '0']
+- [osmosdr_source_0, '0', blocks_correctiq_0, '0']
 - [spectro_0, '0', blocks_zeromq_pub_sink_0, '0']
 
 metadata:

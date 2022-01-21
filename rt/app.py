@@ -13,6 +13,7 @@ import os, sys, time, flask, psutil, signal, threading, subprocess
 
 from .spectro_uhd import spectro_uhd
 from .spectro_osmo import spectro_osmo
+from .spectro_fake import spectro_fake
 
 ########################################################################################################################
 
@@ -56,9 +57,17 @@ class SpectroThread(threading.Thread):
 
     def __init__(self, clk_src, fft_bins, int_time, bandwidth, frequency, rx_gain):
 
+        ################################################################################################################
+
         threading.Thread.__init__(self)
 
-        if flask.request.args.get('interface', 'uhd') == 'uhd':
+        ################################################################################################################
+
+        interface = flask.request.args.get('interface', 'uhd')
+
+        ################################################################################################################
+
+        if   interface == 'uhd':
 
             self.block = spectro_uhd(
                 clk_src = clk_src,
@@ -69,9 +78,20 @@ class SpectroThread(threading.Thread):
                 rx_gain = rx_gain
             )
 
-        else:
+        elif interface == 'osmo':
 
             self.block = spectro_osmo(
+                clk_src = clk_src,
+                fft_bins = fft_bins,
+                int_time = int_time,
+                bandwidth = bandwidth,
+                frequency = frequency,
+                rx_gain = rx_gain
+            )
+
+        else:
+
+            self.block = spectro_fake(
                 clk_src = clk_src,
                 fft_bins = fft_bins,
                 int_time = int_time,
@@ -362,8 +382,8 @@ def route_rt_reboot():
 
 ########################################################################################################################
 
-@app.route('/rt/halt', methods = ['GET'])
-def route_rt_halt():
+@app.route('/rt/poweroff', methods = ['GET'])
+def route_rt_poweroff():
 
     threading.Timer(1, lambda: os.system('shutdown -h now')).start()
 
