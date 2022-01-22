@@ -15,8 +15,6 @@ from .spectro_uhd_1  import spectro_uhd_1
 from .spectro_uhd_2  import spectro_uhd_2
 from .spectro_osmo_1 import spectro_osmo_1
 from .spectro_osmo_2 import spectro_osmo_2
-from .spectro_fake_1 import spectro_fake_1
-from .spectro_fake_2 import spectro_fake_2
 
 ########################################################################################################################
 
@@ -96,17 +94,6 @@ class SpectroThread(threading.Thread):
                     rx_gain = rx_gain
                 )
 
-            else:
-
-                self.block = spectro_fake_2(
-                    clk_src = clk_src,
-                    fft_bins = fft_bins,
-                    bandwidth = bandwidth,
-                    frequency = frequency,
-                    int_time = int_time,
-                    rx_gain = rx_gain
-                )
-
         else:
 
             if   interface == 'uhd':
@@ -123,17 +110,6 @@ class SpectroThread(threading.Thread):
             elif interface == 'osmo':
 
                 self.block = spectro_osmo_1(
-                    clk_src = clk_src,
-                    fft_bins = fft_bins,
-                    bandwidth = bandwidth,
-                    frequency = frequency,
-                    int_time = int_time,
-                    rx_gain = rx_gain
-                )
-
-            else:
-
-                self.block = spectro_fake_1(
                     clk_src = clk_src,
                     fft_bins = fft_bins,
                     bandwidth = bandwidth,
