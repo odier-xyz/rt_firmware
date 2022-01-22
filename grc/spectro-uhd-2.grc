@@ -65,6 +65,57 @@ blocks:
     coordinate: [456, 140.0]
     rotation: 0
     state: true
+- name: blocks_correctiq_0_0
+  id: blocks_correctiq
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [456, 316.0]
+    rotation: 0
+    state: true
+- name: blocks_streams_to_vector_0
+  id: blocks_streams_to_vector
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_streams: '2'
+    type: float
+    vlen: fft_bins
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [896, 212.0]
+    rotation: 0
+    state: true
+- name: blocks_streams_to_vector_0_0
+  id: blocks_streams_to_vector
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_streams: '2'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [624, 212.0]
+    rotation: 0
+    state: true
 - name: blocks_uhd_usrp_source_0
   id: uhd_usrp_source
   parameters:
@@ -135,7 +186,7 @@ blocks:
     bw8: '0'
     bw9: '0'
     center_freq0: frequency
-    center_freq1: '0'
+    center_freq1: frequency
     center_freq10: '0'
     center_freq11: '0'
     center_freq12: '0'
@@ -243,7 +294,7 @@ blocks:
     dev_addr: '""'
     dev_args: '""'
     gain0: rx_gain
-    gain1: '0'
+    gain1: rx_gain
     gain10: '0'
     gain11: '0'
     gain12: '0'
@@ -436,7 +487,7 @@ blocks:
     lo_source9: internal
     maxoutbuf: '0'
     minoutbuf: '0'
-    nchan: '1'
+    nchan: '2'
     num_mboards: '1'
     otw: ''
     rx_agc0: Default
@@ -498,7 +549,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [288, 112.0]
+    coordinate: [256, 176.0]
     rotation: 0
     state: true
 - name: blocks_zeromq_pub_sink_0
@@ -513,12 +564,12 @@ blocks:
     pass_tags: 'False'
     timeout: '100'
     type: float
-    vlen: fft_bins
+    vlen: 2 * fft_bins
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [744, 208.0]
+    coordinate: [1040, 208.0]
     rotation: 0
     state: true
 - name: blocks_zeromq_pub_sink_0_0
@@ -533,12 +584,12 @@ blocks:
     pass_tags: 'False'
     timeout: '100'
     type: complex
-    vlen: '1'
+    vlen: '2'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [744, 128.0]
+    coordinate: [760, 208.0]
     rotation: 0
     state: true
 - name: clk_src
@@ -675,15 +726,39 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [624, 220.0]
+    coordinate: [616, 132.0]
+    rotation: 0
+    state: true
+- name: spectro_0_0
+  id: spectro
+  parameters:
+    affinity: ''
+    alias: ''
+    bandwidth: bandwidth
+    comment: ''
+    fft_bins: fft_bins
+    int_time: int_time
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [616, 308.0]
     rotation: 0
     state: true
 
 connections:
-- [blocks_correctiq_0, '0', blocks_zeromq_pub_sink_0_0, '0']
+- [blocks_correctiq_0, '0', blocks_streams_to_vector_0_0, '0']
 - [blocks_correctiq_0, '0', spectro_0, '0']
+- [blocks_correctiq_0_0, '0', blocks_streams_to_vector_0_0, '1']
+- [blocks_correctiq_0_0, '0', spectro_0_0, '0']
+- [blocks_streams_to_vector_0, '0', blocks_zeromq_pub_sink_0, '0']
+- [blocks_streams_to_vector_0_0, '0', blocks_zeromq_pub_sink_0_0, '0']
 - [blocks_uhd_usrp_source_0, '0', blocks_correctiq_0, '0']
-- [spectro_0, '0', blocks_zeromq_pub_sink_0, '0']
+- [blocks_uhd_usrp_source_0, '1', blocks_correctiq_0_0, '0']
+- [spectro_0, '0', blocks_streams_to_vector_0, '0']
+- [spectro_0_0, '0', blocks_streams_to_vector_0, '1']
 
 metadata:
   file_format: 1

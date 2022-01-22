@@ -40,28 +40,46 @@ class spectro_fake_2(gr.top_block):
         ##################################################
         # Blocks
         ##################################################
+        self.spectro_0_0 = spectro(
+            bandwidth=bandwidth,
+            fft_bins=fft_bins,
+            int_time=int_time,
+        )
         self.spectro_0 = spectro(
             bandwidth=bandwidth,
             fft_bins=fft_bins,
             int_time=int_time,
         )
-        self.blocks_zeromq_pub_sink_0_0 = zeromq.pub_sink(gr.sizeof_gr_complex, 1, 'tcp://*:{}'.format(port1), 100, False, -1, '')
-        self.blocks_zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_float, fft_bins, 'tcp://*:{}'.format(port2), 100, False, -1, '')
+        self.blocks_zeromq_pub_sink_0_0 = zeromq.pub_sink(gr.sizeof_gr_complex, 2, 'tcp://*:{}'.format(port1), 100, False, -1, '')
+        self.blocks_zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_float, 2 * fft_bins, 'tcp://*:{}'.format(port2), 100, False, -1, '')
+        self.blocks_throttle_0_0 = blocks.throttle(gr.sizeof_gr_complex * 1, bandwidth,True)
         self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex * 1, bandwidth,True)
+        self.blocks_streams_to_vector_0_0 = blocks.streams_to_vector(gr.sizeof_gr_complex * 1, 2)
+        self.blocks_streams_to_vector_0 = blocks.streams_to_vector(gr.sizeof_float * fft_bins, 2)
+        self.blocks_add_xx_0_0 = blocks.add_vcc(1)
         self.blocks_add_xx_0 = blocks.add_vcc(1)
         self.analog_sig_source_x_0 = analog.sig_source_c(bandwidth, analog.GR_COS_WAVE, 1420405751, 0.001, 0, 0)
+        self.analog_fastnoise_source_x_0_0 = analog.fastnoise_source_c(analog.GR_GAUSSIAN, 0.001, 0, 8192)
         self.analog_fastnoise_source_x_0 = analog.fastnoise_source_c(analog.GR_GAUSSIAN, 0.001, 0, 8192)
 
 
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.analog_fastnoise_source_x_0, 0), (self.blocks_add_xx_0, 1))
-        self.connect((self.analog_sig_source_x_0, 0), (self.blocks_add_xx_0, 0))
+        self.connect((self.analog_fastnoise_source_x_0, 0), (self.blocks_add_xx_0, 0))
+        self.connect((self.analog_fastnoise_source_x_0_0, 0), (self.blocks_add_xx_0_0, 1))
+        self.connect((self.analog_sig_source_x_0, 0), (self.blocks_add_xx_0, 1))
+        self.connect((self.analog_sig_source_x_0, 0), (self.blocks_add_xx_0_0, 0))
         self.connect((self.blocks_add_xx_0, 0), (self.blocks_throttle_0, 0))
-        self.connect((self.blocks_throttle_0, 0), (self.blocks_zeromq_pub_sink_0_0, 0))
+        self.connect((self.blocks_add_xx_0_0, 0), (self.blocks_throttle_0_0, 0))
+        self.connect((self.blocks_streams_to_vector_0, 0), (self.blocks_zeromq_pub_sink_0, 0))
+        self.connect((self.blocks_streams_to_vector_0_0, 0), (self.blocks_zeromq_pub_sink_0_0, 0))
+        self.connect((self.blocks_throttle_0, 0), (self.blocks_streams_to_vector_0_0, 0))
         self.connect((self.blocks_throttle_0, 0), (self.spectro_0, 0))
-        self.connect((self.spectro_0, 0), (self.blocks_zeromq_pub_sink_0, 0))
+        self.connect((self.blocks_throttle_0_0, 0), (self.blocks_streams_to_vector_0_0, 1))
+        self.connect((self.blocks_throttle_0_0, 0), (self.spectro_0_0, 0))
+        self.connect((self.spectro_0, 0), (self.blocks_streams_to_vector_0, 0))
+        self.connect((self.spectro_0_0, 0), (self.blocks_streams_to_vector_0, 1))
 
 
     ####################################################################################################################
@@ -75,7 +93,9 @@ class spectro_fake_2(gr.top_block):
         self.bandwidth = bandwidth
         self.analog_sig_source_x_0.set_sampling_freq(self.bandwidth)
         self.blocks_throttle_0.set_sample_rate(self.bandwidth)
+        self.blocks_throttle_0_0.set_sample_rate(self.bandwidth)
         self.spectro_0.set_bandwidth(self.bandwidth)
+        self.spectro_0_0.set_bandwidth(self.bandwidth)
 
     ####################################################################################################################
 
@@ -97,6 +117,7 @@ class spectro_fake_2(gr.top_block):
     def set_fft_bins(self, fft_bins):
         self.fft_bins = fft_bins
         self.spectro_0.set_fft_bins(self.fft_bins)
+        self.spectro_0_0.set_fft_bins(self.fft_bins)
 
     ####################################################################################################################
 
@@ -118,6 +139,7 @@ class spectro_fake_2(gr.top_block):
     def set_int_time(self, int_time):
         self.int_time = int_time
         self.spectro_0.set_int_time(self.int_time)
+        self.spectro_0_0.set_int_time(self.int_time)
 
     ####################################################################################################################
 

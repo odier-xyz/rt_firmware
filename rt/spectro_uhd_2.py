@@ -44,19 +44,24 @@ class spectro_uhd_2(gr.top_block):
         ##################################################
         # Blocks
         ##################################################
+        self.spectro_0_0 = spectro(
+            bandwidth=bandwidth,
+            fft_bins=fft_bins,
+            int_time=int_time,
+        )
         self.spectro_0 = spectro(
             bandwidth=bandwidth,
             fft_bins=fft_bins,
             int_time=int_time,
         )
-        self.blocks_zeromq_pub_sink_0_0 = zeromq.pub_sink(gr.sizeof_gr_complex, 1, 'tcp://*:{}'.format(port1), 100, False, -1, '')
-        self.blocks_zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_float, fft_bins, 'tcp://*:{}'.format(port2), 100, False, -1, '')
+        self.blocks_zeromq_pub_sink_0_0 = zeromq.pub_sink(gr.sizeof_gr_complex, 2, 'tcp://*:{}'.format(port1), 100, False, -1, '')
+        self.blocks_zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_float, 2 * fft_bins, 'tcp://*:{}'.format(port2), 100, False, -1, '')
         self.blocks_uhd_usrp_source_0 = uhd.usrp_source(
             ",".join(("", "")),
             uhd.stream_args(
                 cpu_format="fc32",
                 args='',
-                channels=list(range(0,1)),
+                channels=list(range(0,2)),
             ),
         )
         self.blocks_uhd_usrp_source_0.set_clock_source(clk_src, 0)
@@ -66,16 +71,29 @@ class spectro_uhd_2(gr.top_block):
         self.blocks_uhd_usrp_source_0.set_center_freq(frequency, 0)
         self.blocks_uhd_usrp_source_0.set_antenna('RX2', 0)
         self.blocks_uhd_usrp_source_0.set_gain(rx_gain, 0)
+
+        self.blocks_uhd_usrp_source_0.set_center_freq(frequency, 1)
+        self.blocks_uhd_usrp_source_0.set_antenna('RX2', 1)
+        self.blocks_uhd_usrp_source_0.set_gain(rx_gain, 1)
+        self.blocks_streams_to_vector_0_0 = blocks.streams_to_vector(gr.sizeof_gr_complex * 1, 2)
+        self.blocks_streams_to_vector_0 = blocks.streams_to_vector(gr.sizeof_float * fft_bins, 2)
+        self.blocks_correctiq_0_0 = blocks.correctiq()
         self.blocks_correctiq_0 = blocks.correctiq()
 
 
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.blocks_correctiq_0, 0), (self.blocks_zeromq_pub_sink_0_0, 0))
+        self.connect((self.blocks_correctiq_0, 0), (self.blocks_streams_to_vector_0_0, 0))
         self.connect((self.blocks_correctiq_0, 0), (self.spectro_0, 0))
+        self.connect((self.blocks_correctiq_0_0, 0), (self.blocks_streams_to_vector_0_0, 1))
+        self.connect((self.blocks_correctiq_0_0, 0), (self.spectro_0_0, 0))
+        self.connect((self.blocks_streams_to_vector_0, 0), (self.blocks_zeromq_pub_sink_0, 0))
+        self.connect((self.blocks_streams_to_vector_0_0, 0), (self.blocks_zeromq_pub_sink_0_0, 0))
         self.connect((self.blocks_uhd_usrp_source_0, 0), (self.blocks_correctiq_0, 0))
-        self.connect((self.spectro_0, 0), (self.blocks_zeromq_pub_sink_0, 0))
+        self.connect((self.blocks_uhd_usrp_source_0, 1), (self.blocks_correctiq_0_0, 0))
+        self.connect((self.spectro_0, 0), (self.blocks_streams_to_vector_0, 0))
+        self.connect((self.spectro_0_0, 0), (self.blocks_streams_to_vector_0, 1))
 
 
     ####################################################################################################################
@@ -89,6 +107,7 @@ class spectro_uhd_2(gr.top_block):
         self.bandwidth = bandwidth
         self.blocks_uhd_usrp_source_0.set_samp_rate(self.bandwidth)
         self.spectro_0.set_bandwidth(self.bandwidth)
+        self.spectro_0_0.set_bandwidth(self.bandwidth)
 
     ####################################################################################################################
 
@@ -110,6 +129,7 @@ class spectro_uhd_2(gr.top_block):
     def set_fft_bins(self, fft_bins):
         self.fft_bins = fft_bins
         self.spectro_0.set_fft_bins(self.fft_bins)
+        self.spectro_0_0.set_fft_bins(self.fft_bins)
 
     ####################################################################################################################
 
@@ -121,6 +141,7 @@ class spectro_uhd_2(gr.top_block):
     def set_frequency(self, frequency):
         self.frequency = frequency
         self.blocks_uhd_usrp_source_0.set_center_freq(self.frequency, 0)
+        self.blocks_uhd_usrp_source_0.set_center_freq(self.frequency, 1)
 
     ####################################################################################################################
 
@@ -132,6 +153,7 @@ class spectro_uhd_2(gr.top_block):
     def set_int_time(self, int_time):
         self.int_time = int_time
         self.spectro_0.set_int_time(self.int_time)
+        self.spectro_0_0.set_int_time(self.int_time)
 
     ####################################################################################################################
 
@@ -163,5 +185,6 @@ class spectro_uhd_2(gr.top_block):
     def set_rx_gain(self, rx_gain):
         self.rx_gain = rx_gain
         self.blocks_uhd_usrp_source_0.set_gain(self.rx_gain, 0)
+        self.blocks_uhd_usrp_source_0.set_gain(self.rx_gain, 1)
 
 ########################################################################################################################

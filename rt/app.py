@@ -66,42 +66,81 @@ class SpectroThread(threading.Thread):
 
         ################################################################################################################
 
-        interface = flask.request.args.get('interface', 'uhd')
+        interface = str(flask.request.args.get('interface', 'uhd'))
+
+        channels  = int(flask.request.args.get('channels' ,  '1' ))
 
         ################################################################################################################
 
-        if   interface == 'uhd':
+        if channels == 2:
 
-            self.block = spectro_uhd_1(
-                clk_src = clk_src,
-                fft_bins = fft_bins,
-                bandwidth = bandwidth,
-                frequency = frequency,
-                int_time = int_time,
-                rx_gain = rx_gain
-            )
+            if   interface == 'uhd':
 
-        elif interface == 'osmo':
+                self.block = spectro_uhd_2(
+                    clk_src = clk_src,
+                    fft_bins = fft_bins,
+                    bandwidth = bandwidth,
+                    frequency = frequency,
+                    int_time = int_time,
+                    rx_gain = rx_gain
+                )
 
-            self.block = spectro_osmo_1(
-                clk_src = clk_src,
-                fft_bins = fft_bins,
-                bandwidth = bandwidth,
-                frequency = frequency,
-                int_time = int_time,
-                rx_gain = rx_gain
-            )
+            elif interface == 'osmo':
+
+                self.block = spectro_osmo_2(
+                    clk_src = clk_src,
+                    fft_bins = fft_bins,
+                    bandwidth = bandwidth,
+                    frequency = frequency,
+                    int_time = int_time,
+                    rx_gain = rx_gain
+                )
+
+            else:
+
+                self.block = spectro_fake_2(
+                    clk_src = clk_src,
+                    fft_bins = fft_bins,
+                    bandwidth = bandwidth,
+                    frequency = frequency,
+                    int_time = int_time,
+                    rx_gain = rx_gain
+                )
 
         else:
 
-            self.block = spectro_fake_1(
-                clk_src = clk_src,
-                fft_bins = fft_bins,
-                bandwidth = bandwidth,
-                frequency = frequency,
-                int_time = int_time,
-                rx_gain = rx_gain
-            )
+            if   interface == 'uhd':
+
+                self.block = spectro_uhd_1(
+                    clk_src = clk_src,
+                    fft_bins = fft_bins,
+                    bandwidth = bandwidth,
+                    frequency = frequency,
+                    int_time = int_time,
+                    rx_gain = rx_gain
+                )
+
+            elif interface == 'osmo':
+
+                self.block = spectro_osmo_1(
+                    clk_src = clk_src,
+                    fft_bins = fft_bins,
+                    bandwidth = bandwidth,
+                    frequency = frequency,
+                    int_time = int_time,
+                    rx_gain = rx_gain
+                )
+
+            else:
+
+                self.block = spectro_fake_1(
+                    clk_src = clk_src,
+                    fft_bins = fft_bins,
+                    bandwidth = bandwidth,
+                    frequency = frequency,
+                    int_time = int_time,
+                    rx_gain = rx_gain
+                )
 
     ####################################################################################################################
 
