@@ -9,7 +9,7 @@
 # Copyright (c) 2022-XXXX Jérôme Odier
 ########################################################################################################################
 
-import os, sys, time, flask, psutil, signal, threading, subprocess
+import os, sys, time, flask, psutil, serial, signal, threading, subprocess
 
 from .spectro_uhd_1  import spectro_uhd_1
 from .spectro_uhd_2  import spectro_uhd_2
@@ -43,6 +43,54 @@ INT_TIME_DEFAULT = 1
 RX_GAIN_MIN = 0.0
 RX_GAIN_MAX = 76.0
 RX_GAIN_DEFAULT = 30.0
+
+########################################################################################################################
+# GPSDO                                                                                                                #
+########################################################################################################################
+
+class GPSDOThread(threading.Thread):
+
+    ####################################################################################################################
+
+    def __init__(self, port = '/dev/ttyACM0', baudrate = 38400):
+
+        ################################################################################################################
+
+        threading.Thread.__init__(self)
+
+        ################################################################################################################
+
+        self.serial = serial.Serial(port = port, baudrate = baudrate, timeout = 10)
+
+        self.alive = True
+
+    ####################################################################################################################
+
+    def run(self):
+
+        while self.alive:
+
+            try:
+
+                line = self.serial.readline()
+
+                print(line)
+
+            except:
+
+                pass
+
+    ####################################################################################################################
+
+    def stop(self):
+
+        self.alive = False
+
+        self.serial.close()
+
+########################################################################################################################
+
+curr_gpsdo = GPSDOThread()
 
 ########################################################################################################################
 # SPECTRO                                                                                                              #
@@ -83,7 +131,7 @@ class SpectroThread(threading.Thread):
                     rx_gain = rx_gain
                 )
 
-            elif interface == 'osmo':
+            elif interface == 'rtl':
 
                 self.block = spectro_osmo_2(
                     clk_src = clk_src,
@@ -107,7 +155,7 @@ class SpectroThread(threading.Thread):
                     rx_gain = rx_gain
                 )
 
-            elif interface == 'osmo':
+            elif interface == 'rtl':
 
                 self.block = spectro_osmo_1(
                     clk_src = clk_src,
@@ -179,6 +227,18 @@ def route_st_status():
 
     ####################################################################################################################
 
+    try:
+
+        with open('/sys/class/thermal/thermal_zone0/temp', 'r') as f:
+
+            cpu_temp = float(f.read()) / 1000.0
+
+    except:
+
+        cpu_temp = 0.0000000000000 / 1000.0
+
+    ####################################################################################################################
+
     if curr_spectro is None:
 
         spectro = {
@@ -212,12 +272,28 @@ def route_st_status():
             'cpu_count': int(cpu_info.get('CPU(s)', os.cpu_count())),
             'cpu_max_mhz': float(cpu_info.get('CPU max MHz', 0)),
             'cpu_min_mhz': float(cpu_info.get('CPU min MHz', 0)),
+            'cpu_temp': cpu_temp,
             'mem_total': mem_info.total,
             'mem_free': 0x000000000000 + mem_info.available,
             'mem_used': mem_info.total - mem_info.available,
         },
-        'noise-source': None,
+        'noise-source': {
+            'status': 'stopped',
+		},
+		'frontend': {
+			'temp': 0.00,
+		},
+		'backend': {
+			'temp': 0.00,
+		},
         'spectro': spectro,
+		'obs': {
+			'temp': 0.00,
+			'humi': 0.00,
+			'gps_lat': 0.00,
+			'gps_lon': 0.00,
+			'gps_height': 0.00,
+		},
     })
 
 ########################################################################################################################
@@ -418,6 +494,9 @@ def route_rt_poweroff():
 def sig_handler(sig = None, frame = None):
 
     if curr_spectro is not None:
+
+        curr_gpsdo.stop()
+        curr_gpsdo.join()
 
         curr_spectro.stop()
         curr_spectro.join()
