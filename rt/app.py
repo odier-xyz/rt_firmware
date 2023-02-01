@@ -60,7 +60,9 @@ class GPSDOThread(threading.Thread):
 
         ################################################################################################################
 
-        self.serial = serial.Serial(port = port, baudrate = baudrate, timeout = 10)
+        self.serial = serial.Serial(port = port, baudrate = baudrate, timeout = 0)
+
+        self.serial.flushInput()
 
         self.alive = True
 
@@ -70,11 +72,40 @@ class GPSDOThread(threading.Thread):
 
         while self.alive:
 
+            ############################################################################################################
+
             try:
 
-                line = self.serial.readline()
+                line = self.serial.readline().decode('utf-8')
 
-                print(line)
+                if line.startswith('$GPGGA'):
+
+                    parts = line.split(',')
+
+                    if len(parts) == 15 and parts[3] == 'N' and parts[5] == 'E':
+
+                        current_time = '{}:{}:{}'.format(
+                            parts[1][0: 2],
+                            parts[1][2: 4],
+                            parts[1][4: 6]
+                        )
+
+                        current_latitude = parts[2]
+                        current_longitude = parts[4]
+                        current_altitude = parts[9]
+                        current_satellite = parts[7]
+
+                        print('time', current_time, 'latitude', current_latitude, 'longitude', current_longitude, 'altitude', current_altitude, 'current_satellite', current_satellite)
+
+            except:
+
+                pass
+
+            ############################################################################################################
+
+            try:
+
+                time.sleep(0.1)
 
             except:
 
@@ -88,9 +119,13 @@ class GPSDOThread(threading.Thread):
 
         self.serial.close()
 
+        print(self.alive)
+
 ########################################################################################################################
 
 curr_gpsdo = GPSDOThread()
+
+#curr_gpsdo.start()
 
 ########################################################################################################################
 # SPECTRO                                                                                                              #
@@ -495,11 +530,11 @@ def sig_handler(sig = None, frame = None):
 
     if curr_spectro is not None:
 
-        curr_gpsdo.stop()
-        curr_gpsdo.join()
-
         curr_spectro.stop()
         curr_spectro.join()
+
+    curr_gpsdo.stop()
+    curr_gpsdo.join()
 
     print('\nBye.')
 

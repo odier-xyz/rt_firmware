@@ -173,8 +173,42 @@ blocks:
     coordinate: [16, 332.0]
     rotation: 0
     state: enabled
-- name: osmosdr_source_0
-  id: osmosdr_source
+- name: port1
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '50001'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [144, 12.0]
+    rotation: 0
+    state: true
+- name: port2
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '50002'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [224, 12.0]
+    rotation: 0
+    state: true
+- name: rtlsdr_source_0
+  id: rtlsdr_source
   parameters:
     affinity: ''
     alias: ''
@@ -210,8 +244,8 @@ blocks:
     ant7: ''
     ant8: ''
     ant9: ''
-    args: '""'
-    bb_gain0: '20'
+    args: '"rtl=0"'
+    bb_gain0: '15'
     bb_gain1: '20'
     bb_gain10: '20'
     bb_gain11: '20'
@@ -275,7 +309,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    clock_source0: clk_src
+    clock_source0: ''
     clock_source1: ''
     clock_source2: ''
     clock_source3: ''
@@ -444,7 +478,7 @@ blocks:
     gain_mode7: 'False'
     gain_mode8: 'False'
     gain_mode9: 'False'
-    if_gain0: '20'
+    if_gain0: '15'
     if_gain1: '20'
     if_gain10: '20'
     if_gain11: '20'
@@ -530,40 +564,6 @@ blocks:
     coordinate: [256, 84.0]
     rotation: 0
     state: true
-- name: port1
-  id: parameter
-  parameters:
-    alias: ''
-    comment: ''
-    hide: none
-    label: ''
-    short_id: ''
-    type: intx
-    value: '50001'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [144, 12.0]
-    rotation: 0
-    state: true
-- name: port2
-  id: parameter
-  parameters:
-    alias: ''
-    comment: ''
-    hide: none
-    label: ''
-    short_id: ''
-    type: intx
-    value: '50002'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [224, 12.0]
-    rotation: 0
-    state: true
 - name: rx_gain
   id: parameter
   parameters:
@@ -603,7 +603,7 @@ blocks:
 connections:
 - [blocks_correctiq_0, '0', blocks_zeromq_pub_sink_0_0, '0']
 - [blocks_correctiq_0, '0', spectro_0, '0']
-- [osmosdr_source_0, '0', blocks_correctiq_0, '0']
+- [rtlsdr_source_0, '0', blocks_correctiq_0, '0']
 - [spectro_0, '0', blocks_zeromq_pub_sink_0, '0']
 
 metadata:

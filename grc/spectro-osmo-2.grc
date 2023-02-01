@@ -62,7 +62,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [456, 140.0]
+    coordinate: [440, 140.0]
     rotation: 0
     state: true
 - name: blocks_correctiq_0_0
@@ -77,43 +77,45 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [456, 316.0]
+    coordinate: [440, 316.0]
     rotation: 0
     state: true
-- name: blocks_streams_to_vector_0
-  id: blocks_streams_to_vector
+- name: blocks_stream_mux_0
+  id: blocks_stream_mux
   parameters:
     affinity: ''
     alias: ''
     comment: ''
+    lengths: (fft_bins, fft_bins)
     maxoutbuf: '0'
     minoutbuf: '0'
-    num_streams: '2'
+    num_inputs: '2'
     type: float
     vlen: fft_bins
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [896, 212.0]
+    coordinate: [888, 212.0]
     rotation: 0
     state: true
-- name: blocks_streams_to_vector_0_0
-  id: blocks_streams_to_vector
+- name: blocks_stream_mux_1
+  id: blocks_stream_mux
   parameters:
     affinity: ''
     alias: ''
     comment: ''
+    lengths: (1, 1)
     maxoutbuf: '0'
     minoutbuf: '0'
-    num_streams: '2'
+    num_inputs: '2'
     type: complex
     vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [624, 212.0]
+    coordinate: [608, 212.0]
     rotation: 0
     state: true
 - name: blocks_zeromq_pub_sink_0
@@ -128,7 +130,7 @@ blocks:
     pass_tags: 'False'
     timeout: '100'
     type: float
-    vlen: 2 * fft_bins
+    vlen: fft_bins
   states:
     bus_sink: false
     bus_source: false
@@ -148,12 +150,12 @@ blocks:
     pass_tags: 'False'
     timeout: '100'
     type: complex
-    vlen: '2'
+    vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [760, 208.0]
+    coordinate: [728, 216.0]
     rotation: 0
     state: true
 - name: clk_src
@@ -224,8 +226,42 @@ blocks:
     coordinate: [16, 332.0]
     rotation: 0
     state: enabled
-- name: osmosdr_source_0
-  id: osmosdr_source
+- name: port1
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '50001'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [144, 12.0]
+    rotation: 0
+    state: true
+- name: port2
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: intx
+    value: '50002'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [224, 12.0]
+    rotation: 0
+    state: true
+- name: rtlsdr_source_0_0
+  id: rtlsdr_source
   parameters:
     affinity: ''
     alias: ''
@@ -261,8 +297,8 @@ blocks:
     ant7: ''
     ant8: ''
     ant9: ''
-    args: '""'
-    bb_gain0: '20'
+    args: '"rtl=0"'
+    bb_gain0: '15'
     bb_gain1: '20'
     bb_gain10: '20'
     bb_gain11: '20'
@@ -294,7 +330,7 @@ blocks:
     bb_gain7: '20'
     bb_gain8: '20'
     bb_gain9: '20'
-    bw0: bandwidth
+    bw0: '0'
     bw1: '0'
     bw10: '0'
     bw11: '0'
@@ -326,7 +362,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    clock_source0: clk_src
+    clock_source0: ''
     clock_source1: ''
     clock_source2: ''
     clock_source3: ''
@@ -495,7 +531,7 @@ blocks:
     gain_mode7: 'False'
     gain_mode8: 'False'
     gain_mode9: 'False'
-    if_gain0: '20'
+    if_gain0: '15'
     if_gain1: '20'
     if_gain10: '20'
     if_gain11: '20'
@@ -578,41 +614,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [224, 120.0]
-    rotation: 0
-    state: true
-- name: port1
-  id: parameter
-  parameters:
-    alias: ''
-    comment: ''
-    hide: none
-    label: ''
-    short_id: ''
-    type: intx
-    value: '50001'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [144, 12.0]
-    rotation: 0
-    state: true
-- name: port2
-  id: parameter
-  parameters:
-    alias: ''
-    comment: ''
-    hide: none
-    label: ''
-    short_id: ''
-    type: intx
-    value: '50002'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [224, 12.0]
+    coordinate: [208, 128.0]
     rotation: 0
     state: true
 - name: rx_gain
@@ -647,7 +649,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [616, 132.0]
+    coordinate: [608, 132.0]
     rotation: 0
     state: true
 - name: spectro_0_0
@@ -665,21 +667,21 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [616, 308.0]
+    coordinate: [608, 308.0]
     rotation: 0
     state: true
 
 connections:
-- [blocks_correctiq_0, '0', blocks_streams_to_vector_0_0, '0']
+- [blocks_correctiq_0, '0', blocks_stream_mux_1, '0']
 - [blocks_correctiq_0, '0', spectro_0, '0']
-- [blocks_correctiq_0_0, '0', blocks_streams_to_vector_0_0, '1']
+- [blocks_correctiq_0_0, '0', blocks_stream_mux_1, '1']
 - [blocks_correctiq_0_0, '0', spectro_0_0, '0']
-- [blocks_streams_to_vector_0, '0', blocks_zeromq_pub_sink_0, '0']
-- [blocks_streams_to_vector_0_0, '0', blocks_zeromq_pub_sink_0_0, '0']
-- [osmosdr_source_0, '0', blocks_correctiq_0, '0']
-- [osmosdr_source_0, '1', blocks_correctiq_0_0, '0']
-- [spectro_0, '0', blocks_streams_to_vector_0, '0']
-- [spectro_0_0, '0', blocks_streams_to_vector_0, '1']
+- [blocks_stream_mux_0, '0', blocks_zeromq_pub_sink_0, '0']
+- [blocks_stream_mux_1, '0', blocks_zeromq_pub_sink_0_0, '0']
+- [rtlsdr_source_0_0, '0', blocks_correctiq_0, '0']
+- [rtlsdr_source_0_0, '1', blocks_correctiq_0_0, '0']
+- [spectro_0, '0', blocks_stream_mux_0, '0']
+- [spectro_0_0, '0', blocks_stream_mux_0, '1']
 
 metadata:
   file_format: 1

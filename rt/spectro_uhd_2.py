@@ -54,8 +54,8 @@ class spectro_uhd_2(gr.top_block):
             fft_bins=fft_bins,
             int_time=int_time,
         )
-        self.blocks_zeromq_pub_sink_0_0 = zeromq.pub_sink(gr.sizeof_gr_complex, 2, 'tcp://*:{}'.format(port1), 100, False, -1, '')
-        self.blocks_zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_float, 2 * fft_bins, 'tcp://*:{}'.format(port2), 100, False, -1, '')
+        self.blocks_zeromq_pub_sink_0_0 = zeromq.pub_sink(gr.sizeof_gr_complex, 1, 'tcp://*:{}'.format(port1), 100, False, -1, '')
+        self.blocks_zeromq_pub_sink_0 = zeromq.pub_sink(gr.sizeof_float, fft_bins, 'tcp://*:{}'.format(port2), 100, False, -1, '')
         self.blocks_uhd_usrp_source_0 = uhd.usrp_source(
             ",".join(("", "")),
             uhd.stream_args(
@@ -75,8 +75,8 @@ class spectro_uhd_2(gr.top_block):
         self.blocks_uhd_usrp_source_0.set_center_freq(frequency, 1)
         self.blocks_uhd_usrp_source_0.set_antenna('RX2', 1)
         self.blocks_uhd_usrp_source_0.set_gain(rx_gain, 1)
-        self.blocks_streams_to_vector_0_0 = blocks.streams_to_vector(gr.sizeof_gr_complex * 1, 2)
-        self.blocks_streams_to_vector_0 = blocks.streams_to_vector(gr.sizeof_float * fft_bins, 2)
+        self.blocks_stream_mux_1 = blocks.stream_mux(gr.sizeof_float * fft_bins, (fft_bins, fft_bins))
+        self.blocks_stream_mux_0 = blocks.stream_mux(gr.sizeof_gr_complex * 1, (1, 1))
         self.blocks_correctiq_0_0 = blocks.correctiq()
         self.blocks_correctiq_0 = blocks.correctiq()
 
@@ -84,16 +84,16 @@ class spectro_uhd_2(gr.top_block):
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.blocks_correctiq_0, 0), (self.blocks_streams_to_vector_0_0, 0))
+        self.connect((self.blocks_correctiq_0, 0), (self.blocks_stream_mux_0, 0))
         self.connect((self.blocks_correctiq_0, 0), (self.spectro_0, 0))
-        self.connect((self.blocks_correctiq_0_0, 0), (self.blocks_streams_to_vector_0_0, 1))
+        self.connect((self.blocks_correctiq_0_0, 0), (self.blocks_stream_mux_0, 1))
         self.connect((self.blocks_correctiq_0_0, 0), (self.spectro_0_0, 0))
-        self.connect((self.blocks_streams_to_vector_0, 0), (self.blocks_zeromq_pub_sink_0, 0))
-        self.connect((self.blocks_streams_to_vector_0_0, 0), (self.blocks_zeromq_pub_sink_0_0, 0))
+        self.connect((self.blocks_stream_mux_0, 0), (self.blocks_zeromq_pub_sink_0_0, 0))
+        self.connect((self.blocks_stream_mux_1, 0), (self.blocks_zeromq_pub_sink_0, 0))
         self.connect((self.blocks_uhd_usrp_source_0, 0), (self.blocks_correctiq_0, 0))
         self.connect((self.blocks_uhd_usrp_source_0, 1), (self.blocks_correctiq_0_0, 0))
-        self.connect((self.spectro_0, 0), (self.blocks_streams_to_vector_0, 0))
-        self.connect((self.spectro_0_0, 0), (self.blocks_streams_to_vector_0, 1))
+        self.connect((self.spectro_0, 0), (self.blocks_stream_mux_1, 0))
+        self.connect((self.spectro_0_0, 0), (self.blocks_stream_mux_1, 1))
 
 
     ####################################################################################################################
